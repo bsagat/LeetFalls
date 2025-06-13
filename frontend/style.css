@@ -1,0 +1,442 @@
+body {
+    margin: 0;
+    background-color: #0d0d0d;
+    font-family: 'Courier New', monospace;
+    color: #00ffcc;
+}
+
+nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid #00ffcc;
+    margin: 1em;
+    border-radius: 10px;
+}
+
+nav a {
+    color: #cccccc;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+nav a:hover {
+    color: #00ffcc;
+    text-shadow: 0 0 5px #00ffcc;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 3em;
+    padding: 2em;
+    flex-wrap: wrap;
+}
+
+.text-block {
+    max-width: 400px;
+}
+
+.text-block h1 {
+    font-size: 3em;
+    margin-bottom: 0.1em;
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ffcc;
+}
+
+.tagline {
+    font-size: 1.2em;
+    margin-bottom: 1em;
+    color: #00ffcc;
+    border-left: 3px solid #00ffcc;
+    padding-left: 0.5em;
+    font-style: italic;
+}
+
+.text-block p {
+    font-size: 1em;
+    color: #cccccc;
+    line-height: 1.5em;
+}
+
+.image-block img {
+    width: 768px;
+    height: 432px;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .image-block img {
+        width: 80%;
+        height: auto;
+    }
+}
+.nav-icon {
+    height: 3em;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+nav a strong {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.circular-image-container {
+    width: 48px;
+    height: 46px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
+.circular-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.quote-text {
+    font-family: 'Courgette', monospace;
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #cccccc;
+    font-style: italic;
+    padding-left: 1em;
+}
+
+.image-text-combo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 2em auto;
+    max-width: 900px;
+}
+
+/* Стили для контейнера кнопки */
+.posts-button-container {
+    display: flex;
+    margin-bottom: 0; /* Убираем отступ снизу, прижимая к линии */
+    max-width: 900px; /* Ограничиваем ширину, чтобы соответствовать контенту */
+    margin-left: 100px;
+    margin-right: auto;
+    padding: 0 1em; /* Учитываем возможные отступы body */
+}
+
+.explore-button {
+    display: inline-block;
+    padding: 0.8em 1.5em;
+    border: 1px solid #ffffff;
+    border-bottom: none; /* УДАЛЯЕМ НИЖНЮЮ ГРАНИЦУ */
+    border-radius: 15px 15px 0 0; /* Верхний левый, верхний правый, нижний правый, нижний левый */
+    background-color: transparent;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.explore-button:hover {
+    background-color: #00ffcc;
+    color: #0d0d0d;
+    box-shadow: 0 0 10px #00ffcc;
+}
+
+.white-line {
+    width: 100vw;
+    position: relative;
+    left: 0;
+    height: 1px;
+    background-color: #ffffff;
+    margin-top: 0; /* Убираем отступ сверху, прижимая к кнопке */
+    margin-bottom: 2em;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Контейнер для всех Postов - теперь для general-post и сетки */
+.posts-wrapper {
+    max-width: 900px;
+    margin-left: 95px;
+    margin-bottom: 95px;
+    padding: 0 1em;
+    display: flex; /* Используем flexbox для размещения general-post и small-posts-grid */
+    align-items: flex-start; /* Выравнивание по верхнему краю */
+    gap: 134px; /* Расстояние между general-post и сеткой small-posts */
+}
+
+/* Стили для основного (большого) Postа */
+.general-post {
+    width: 277px;
+    height: 257px;
+    border: 1px solid #ffffff;
+    border-radius: 15px;
+    background-color: #000000;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.general-post a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    flex-grow: 1;
+}
+
+.general-post a img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px 15px 0 0;
+    display: block;
+}
+
+/* Стили для круга аватарки на большом Postу */
+.post-avatar-circle {
+    width: 51px;
+    height: 51px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    overflow: hidden;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.post-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Контейнер для сетки маленьких Postов */
+.small-posts-grid {
+    display: flex;
+    flex-direction: column; /* Postы будут располагаться в колонках (строках) */
+    gap: 18px; /* Расстояние между строками Postов */
+}
+
+.small-post-row {
+    display: flex;
+    gap: 13px; /* Расстояние между Postами в одной строке */
+}
+
+/* Стили для каждого маленького Postа */
+.small-post {
+    width: 158px;
+    height: 120px;
+    border: 1px solid #ffffff;
+    border-radius: 8px; /* Немного скругленные углы */
+    background-color: #000000;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Для размещения аватарки внизу */
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.small-post a {
+    text-decoration: none;
+    color: inherit;
+    display: block; /* Ссылка как блочный элемент */
+    flex-grow: 1; /* Позволяет ссылке занять доступное пространство */
+    width: 100%; /* Занимает всю ширину Postа */
+    height: 100%; /* Занимает всю высоту Postа */
+}
+
+.small-post img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px; /* Скругление для изображения Postа */
+    display: block;
+}
+
+/* Стили для круга аватарки на маленьких Postах */
+.small-post-avatar-circle {
+    width: 30px; /* Меньший размер для аватарки в маленьком Postу */
+    height: 30px;
+    border: 1px solid #ffffff; /* Тонкая белая рамка */
+    border-radius: 50%;
+    overflow: hidden;
+    position: absolute;
+    bottom: 5px; /* Отступ от нижнего края */
+    left: 5px; /* Отступ от левого края */
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.small-post-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Специальные стили для угловых Postов */
+.top-left-post {
+    border-radius: 30px 0 0 0; /* top-left, top-right, bottom-right, bottom-left */
+}
+.top-left-post img {
+    border-radius: 30px 0 0 0; /* Учитываем, что нижние углы изображения могут быть не видны, если изображение не доходит до конца */
+}
+
+.top-right-post {
+    border-radius: 0 30px 0 0;
+}
+.top-right-post img {
+    border-radius: 0 30px 0 0;
+}
+
+.bottom-left-post {
+    border-radius: 0 0 0 30px;
+}
+.bottom-left-post img {
+    border-radius: 0 0 0 30px; /* Если изображение заполняет только верхнюю часть Postа */
+}
+
+.bottom-right-post {
+    border-radius: 0 0 30px 0;
+}
+.bottom-right-post img {
+    border-radius: 0 0 30px 0; /* Если изображение заполняет только верхнюю часть Postа */
+}
+
+
+
+/* Адаптивность */
+@media (max-width: 950px) { /* Если сетка не умещается рядом с большим Postом */
+    .posts-wrapper {
+        flex-direction: column; /* Большой Post и сетка идут друг под другом */
+        align-items: center;
+        gap: 2em; /* Расстояние между большим Postом и сеткой */
+        margin-left: auto; /* Центрируем, если только один элемент */
+    }
+    .general-post {
+        margin: 0.5em auto; /* Центрируем */
+    }
+}
+
+@media (max-width: 700px) { /* Для планшетов, уменьшаем количество Postов в строке */
+    .small-post-row {
+        flex-wrap: wrap; /* Разрешаем перенос на следующую строку */
+        justify-content: center;
+    }
+    .small-post {
+        width: calc(50% - 1em); /* По 2 Postа в ряд, учитывая отступы */
+        max-width: 158px; /* Ограничиваем максимальную ширину */
+        height: auto; /* Позволяем высоте адаптироваться */
+    }
+}
+
+@media (max-width: 480px) { /* Для мобильных устройств */
+    .posts-button-container {
+        margin-left: auto; /* Центрируем кнопку */
+        justify-content: center;
+    }
+    .posts-wrapper {
+        margin-left: auto; /* Центрируем весь блок Postов */
+    }
+    .general-post, .small-post {
+        width: 90%; /* Ширина Postа на маленьких экранах */
+        height: auto;
+        margin: 0.5em auto; /* Центрируем */
+    }
+    .small-post-row {
+        flex-direction: column; /* По 1 Postу в ряд */
+        align-items: center;
+    }
+}
+footer {
+    background-color: #0d0d0d; /* Темный фон, как у body */
+    color: #00ffcc; /* Цвет текста, как основной акцентный цвет */
+    text-align: center;
+    padding: 2em 1em;
+    margin-top: 4em; /* Отступ сверху от основного контента */
+    border-top: 1px solid #00ffcc; /* Верхняя граница в стиле "неоновой линии" */
+    box-shadow: 0 -2px 10px rgba(0, 255, 204, 0.3); /* Неоновое свечение вверх */
+    font-size: 0.9em;
+}
+
+footer .footer-line {
+    width: 80%; /* Ширина линии */
+    height: 1px;
+    background-color: #00ffcc; /* Цвет линии */
+    margin: 1em auto; /* Центрирование и отступы */
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.5); /* Небольшое свечение для линии */
+}
+
+footer p {
+    margin: 0.5em 0;
+    line-height: 1.4;
+}
+
+/* Адаптивность футера */
+@media (max-width: 600px) {
+    footer {
+        font-size: 0.8em;
+        padding: 1.5em 1em;
+    }
+    footer .footer-line {
+        width: 90%;
+    }
+}
+
+.header-image-container {
+    width: 100%; /* Занимает всю доступную ширину */
+    overflow: hidden; /* Обрезает содержимое, если оно выходит за пределы */
+    display: flex; /* Для центрирования изображения */
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center; /* Центрирование по вертикали (если контейнер выше изображения) */
+    margin-top: 20px; /* Небольшой отступ от навигации, если нужно */
+    margin-bottom: 20px; /* Небольшой отступ перед следующим контентом */
+}
+
+.header-image {
+    width: 1440px; /* Фиксированная ширина, как вы указали */
+    height: 484px; /* Фиксированная высота, как вы указали */
+    object-fit: cover; /* Обрезает изображение, чтобы оно заполнило контейнер, сохраняя пропорции */
+    display: block; /* Убирает лишний пробел под изображением */
+    max-width: 100%; /* Убедитесь, что изображение не выходит за пределы экрана на маленьких устройствах */
+    height: auto; /* Позволяет высоте адаптироваться, если ширина уменьшается из-за max-width */
+}
+
+/* Медиа-запросы для адаптивности, если изображение не должно быть таким большим на маленьких экранах */
+@media (max-width: 1440px) {
+    .header-image {
+        width: 100%; /* Если экран меньше 1440px, изображение займет 100% ширины */
+        height: auto; /* Высота будет автоматически подстраиваться */
+    }
+}
