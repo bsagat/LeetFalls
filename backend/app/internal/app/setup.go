@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 	"io"
-	"leetFalls/internal/adapters/UI/handlers"
+	"leetFalls/internal/adapters/handlers"
 	"leetFalls/internal/domain"
 	"log"
 	"log/slog"

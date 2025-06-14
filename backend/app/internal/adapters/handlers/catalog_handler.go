@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"leetFalls/internal/service"
 	"log/slog"
 	"net/http"
@@ -34,7 +35,6 @@ func (h *CatalogHandler) CreatePostHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	// MultiPartForm parsing
-	//
 	// Max size calculation:
 	// 10 << 20 = 10 * 2^20 = 10 * 1048576 = 10485760
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -42,8 +42,17 @@ func (h *CatalogHandler) CreatePostHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// File Parse
+	file, _, err := r.FormFile("File")
+	if err != nil && err != http.ErrMissingFile {
+		slog.Error("Failed to parse file from form: ", "error", err.Error())
+		ErrorPage(w, errors.New("form file reading error: "+err.Error()), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
 	// Business logic call
-	code, err := h.postServ.CreatePost(cookie)
+	code, err := h.postServ.CreatePost(w, r.FormValue("Name"), r.FormValue("Title"), r.FormValue("Content"), file, cookie)
 	if err != nil {
 		slog.Error("Failed to create post: ", "error", err.Error())
 		ErrorPage(w, err, int(code))
