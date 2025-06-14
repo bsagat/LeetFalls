@@ -13,4 +13,6 @@ func init() {
 	}
 
 	flag.Parse()
+
+	SetConfigs()
 }
