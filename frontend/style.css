@@ -3,6 +3,8 @@ body {
     background-color: #0d0d0d;
     font-family: 'Courier New', monospace;
     color: #00ffcc;
+    position: relative;
+    min-height: 100vh;
 }
 
 nav {
@@ -25,6 +27,20 @@ nav a:hover {
     text-shadow: 0 0 5px #00ffcc;
 }
 
+.nav-icon {
+    height: 3em;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+nav a strong {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+/* === MAIN PAGE STYLES === */
 .container {
     display: flex;
     justify-content: center;
@@ -79,18 +95,6 @@ nav a:hover {
         height: auto;
     }
 }
-.nav-icon {
-    height: 3em;
-    width: auto;
-    vertical-align: middle;
-    margin-right: 0.5em;
-}
-
-nav a strong {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-}
 
 .circular-image-container {
     width: 48px;
@@ -125,22 +129,172 @@ nav a strong {
     max-width: 900px;
 }
 
-/* Стили для контейнера кнопки */
+.header-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    height: 484px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.header-image {
+    width: 1440px;
+    height: 484px;
+    object-fit: cover;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    transition: filter 0.3s ease-in-out;
+    outline: 1px solid #ffffff;
+    outline-offset: -1px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.header-image:hover {
+    filter: blur(0px);
+}
+
+@media (max-width: 1440px) {
+    .header-image {
+        width: 100%;
+        height: auto;
+    }
+}
+
+.header-overlay-titles {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.header-page-title,
+.header-society-title {
+    font-family: 'Courgette', cursive;
+    font-size: 36px;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 20px rgba(0, 255, 204, 0.5);
+    margin: 0.1em 0;
+    font-style: italic;
+    line-height: 1.2;
+}
+
+.header-page-title {
+    font-size: 1.8em;
+}
+.header-society-title {
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .header-overlay-titles {
+        top: 45%;
+    }
+    .header-page-title {
+        font-size: 1.5em;
+    }
+    .header-society-title {
+        font-size: 2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-overlay-titles {
+        top: 40%;
+    }
+    .header-page-title {
+        font-size: 1.2em;
+    }
+    .header-society-title {
+        font-size: 1.8em;
+    }
+}
+
+.content-overlay-container {
+    position: absolute;
+    top: 50%;
+    left: 3%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 39px;
+    width: auto;
+    max-width: 80%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.circular-logo-container {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #ffffff;
+    background-color: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+}
+
+.circular-logo-container .red-eye-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay-text-block {
+    max-width: 535px;
+    color: #ffffff;
+    font-family: 'Courier Prime', monospace;
+    font-size: 19.5px;
+    line-height: 1.2;
+    pointer-events: none;
+    background-color: transparent; 
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+.overlay-text-block p {
+    margin: 0;
+    padding: 0; 
+    font-weight: normal; 
+    text-shadow: 
+        -1px -1px 0 #000, 
+        1px -1px 0 #000,  
+        -1px 1px 0 #000,  
+        1px 1px 0 #000,
+        0 0 1px rgba(255, 255, 255, 0.2), 
+        0 0 2px rgba(0, 0, 0, 0.1); 
+}
+
+/* === ARCHIVE / POSTS SECTION STYLES === */
 .posts-button-container {
     display: flex;
-    margin-bottom: 0; /* Убираем отступ снизу, прижимая к линии */
-    max-width: 900px; /* Ограничиваем ширину, чтобы соответствовать контенту */
+    margin-bottom: 0;
+    max-width: 900px;
     margin-left: 100px;
     margin-right: auto;
-    padding: 0 1em; /* Учитываем возможные отступы body */
+    padding: 0 1em;
 }
 
 .explore-button {
     display: inline-block;
     padding: 0.8em 1.5em;
     border: 1px solid #ffffff;
-    border-bottom: none; /* УДАЛЯЕМ НИЖНЮЮ ГРАНИЦУ */
-    border-radius: 15px 15px 0 0; /* Верхний левый, верхний правый, нижний правый, нижний левый */
+    border-bottom: none;
+    border-radius: 15px 15px 0 0;
     background-color: transparent;
     color: #ffffff;
     font-family: 'Courier New', monospace;
@@ -162,23 +316,21 @@ nav a strong {
     left: 0;
     height: 1px;
     background-color: #ffffff;
-    margin-top: 0; /* Убираем отступ сверху, прижимая к кнопке */
+    margin-top: 0;
     margin-bottom: 2em;
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-/* Контейнер для всех Postов - теперь для general-post и сетки */
 .posts-wrapper {
     max-width: 900px;
     margin-left: 95px;
     margin-bottom: 95px;
     padding: 0 1em;
-    display: flex; /* Используем flexbox для размещения general-post и small-posts-grid */
-    align-items: flex-start; /* Выравнивание по верхнему краю */
-    gap: 134px; /* Расстояние между general-post и сеткой small-posts */
+    display: flex;
+    align-items: flex-start;
+    gap: 134px;
 }
 
-/* Стили для основного (большого) Postа */
 .general-post {
     width: 277px;
     height: 257px;
@@ -214,7 +366,6 @@ nav a strong {
     display: block;
 }
 
-/* Стили для круга аватарки на большом Postу */
 .post-avatar-circle {
     width: 51px;
     height: 51px;
@@ -237,29 +388,27 @@ nav a strong {
     border-radius: 50%;
 }
 
-/* Контейнер для сетки маленьких Postов */
 .small-posts-grid {
     display: flex;
-    flex-direction: column; /* Postы будут располагаться в колонках (строках) */
-    gap: 18px; /* Расстояние между строками Postов */
+    flex-direction: column;
+    gap: 18px;
 }
 
 .small-post-row {
     display: flex;
-    gap: 13px; /* Расстояние между Postами в одной строке */
+    gap: 13px;
 }
 
-/* Стили для каждого маленького Postа */
 .small-post {
     width: 158px;
     height: 120px;
     border: 1px solid #ffffff;
-    border-radius: 8px; /* Немного скругленные углы */
+    border-radius: 8px;
     background-color: #000000;
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Для размещения аватарки внизу */
+    justify-content: space-between;
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
@@ -268,30 +417,29 @@ nav a strong {
 .small-post a {
     text-decoration: none;
     color: inherit;
-    display: block; /* Ссылка как блочный элемент */
-    flex-grow: 1; /* Позволяет ссылке занять доступное пространство */
-    width: 100%; /* Занимает всю ширину Postа */
-    height: 100%; /* Занимает всю высоту Postа */
+    display: block;
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
 }
 
 .small-post img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 8px; /* Скругление для изображения Postа */
+    border-radius: 8px;
     display: block;
 }
 
-/* Стили для круга аватарки на маленьких Postах */
 .small-post-avatar-circle {
-    width: 30px; /* Меньший размер для аватарки в маленьком Postу */
+    width: 30px;
     height: 30px;
-    border: 1px solid #ffffff; /* Тонкая белая рамка */
+    border: 1px solid #ffffff;
     border-radius: 50%;
     overflow: hidden;
     position: absolute;
-    bottom: 5px; /* Отступ от нижнего края */
-    left: 5px; /* Отступ от левого края */
+    bottom: 5px;
+    left: 5px;
     box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
     display: flex;
     justify-content: center;
@@ -305,12 +453,11 @@ nav a strong {
     border-radius: 50%;
 }
 
-/* Специальные стили для угловых Postов */
 .top-left-post {
-    border-radius: 30px 0 0 0; /* top-left, top-right, bottom-right, bottom-left */
+    border-radius: 30px 0 0 0;
 }
 .top-left-post img {
-    border-radius: 30px 0 0 0; /* Учитываем, что нижние углы изображения могут быть не видны, если изображение не доходит до конца */
+    border-radius: 30px 0 0 0;
 }
 
 .top-right-post {
@@ -324,78 +471,127 @@ nav a strong {
     border-radius: 0 0 0 30px;
 }
 .bottom-left-post img {
-    border-radius: 0 0 0 30px; /* Если изображение заполняет только верхнюю часть Postа */
+    border-radius: 0 0 0 30px;
 }
 
 .bottom-right-post {
     border-radius: 0 0 30px 0;
 }
 .bottom-right-post img {
-    border-radius: 0 0 30px 0; /* Если изображение заполняет только верхнюю часть Postа */
+    border-radius: 0 0 30px 0;
 }
 
-
-
-/* Адаптивность */
-@media (max-width: 950px) { /* Если сетка не умещается рядом с большим Postом */
-    .posts-wrapper {
-        flex-direction: column; /* Большой Post и сетка идут друг под другом */
+/* Common Media Queries for responsiveness */
+@media (max-width: 1024px) {
+    .content-overlay-container {
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        flex-direction: column;
         align-items: center;
-        gap: 2em; /* Расстояние между большим Postом и сеткой */
-        margin-left: auto; /* Центрируем, если только один элемент */
+        text-align: center;
+        top: 55%;
+    }
+    .circular-logo-container {
+        width: 180px;
+        height: 167px;
+    }
+    .overlay-text-block {
+        max-width: 90%;
+        height: auto;
+        font-size: 18px;
+        padding: 5px;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 950px) {
+    .posts-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 2em;
+        margin-left: auto;
     }
     .general-post {
-        margin: 0.5em auto; /* Центрируем */
+        margin: 0.5em auto;
     }
 }
 
-@media (max-width: 700px) { /* Для планшетов, уменьшаем количество Postов в строке */
+@media (max-width: 768px) {
+    .content-overlay-container {
+        left: 50%;
+        transform: translate(-50%, -50%);
+        top: 60%;
+        gap: 20px;
+    }
+    .circular-logo-container {
+        width: 150px;
+        height: 139px;
+    }
+    .overlay-text-block {
+        font-size: 16px;
+        padding: 5px;
+        margin-top: 0;
+    }
     .small-post-row {
-        flex-wrap: wrap; /* Разрешаем перенос на следующую строку */
+        flex-wrap: wrap;
         justify-content: center;
     }
     .small-post {
-        width: calc(50% - 1em); /* По 2 Postа в ряд, учитывая отступы */
-        max-width: 158px; /* Ограничиваем максимальную ширину */
-        height: auto; /* Позволяем высоте адаптироваться */
+        width: calc(50% - 1em);
+        max-width: 158px;
+        height: auto;
     }
 }
 
-@media (max-width: 480px) { /* Для мобильных устройств */
+@media (max-width: 700px) {
+    .small-post-row {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .small-post {
+        width: calc(50% - 1em);
+        max-width: 158px;
+        height: auto;
+    }
+}
+
+@media (max-width: 480px) {
     .posts-button-container {
-        margin-left: auto; /* Центрируем кнопку */
+        margin-left: auto;
         justify-content: center;
     }
     .posts-wrapper {
-        margin-left: auto; /* Центрируем весь блок Postов */
+        margin-left: auto;
     }
     .general-post, .small-post {
-        width: 90%; /* Ширина Postа на маленьких экранах */
+        width: 90%;
         height: auto;
-        margin: 0.5em auto; /* Центрируем */
+        margin: 0.5em auto;
     }
     .small-post-row {
-        flex-direction: column; /* По 1 Postу в ряд */
+        flex-direction: column;
         align-items: center;
     }
 }
+
 footer {
-    background-color: #0d0d0d; /* Темный фон, как у body */
-    color: #00ffcc; /* Цвет текста, как основной акцентный цвет */
+    background-color: #0d0d0d;
+    color: #00ffcc;
     text-align: center;
     padding: 2em 1em;
-    margin-top: 4em; /* Отступ сверху от основного контента */
-    border-top: 1px solid #00ffcc; /* Верхняя граница в стиле "неоновой линии" */
-    box-shadow: 0 -2px 10px rgba(0, 255, 204, 0.3); /* Неоновое свечение вверх */
+    margin-top: 4em;
+    border-top: 1px solid #00ffcc;
+    box-shadow: 0 -2px 10px rgba(0, 255, 204, 0.3);
     font-size: 0.9em;
 }
 
 footer .footer-line {
-    width: 80%; /* Ширина линии */
+    width: 80%;
     height: 1px;
-    background-color: #00ffcc; /* Цвет линии */
-    margin: 1em auto; /* Центрирование и отступы */
-    box-shadow: 0 0 5px rgba(0, 255, 255, 0.5); /* Небольшое свечение для линии */
+    background-color: #00ffcc;
+    margin: 1em auto;
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
 }
 
 footer p {
@@ -403,7 +599,6 @@ footer p {
     line-height: 1.4;
 }
 
-/* Адаптивность футера */
 @media (max-width: 600px) {
     footer {
         font-size: 0.8em;
@@ -411,32 +606,5 @@ footer p {
     }
     footer .footer-line {
         width: 90%;
-    }
-}
-
-.header-image-container {
-    width: 100%; /* Занимает всю доступную ширину */
-    overflow: hidden; /* Обрезает содержимое, если оно выходит за пределы */
-    display: flex; /* Для центрирования изображения */
-    justify-content: center; /* Центрирование по горизонтали */
-    align-items: center; /* Центрирование по вертикали (если контейнер выше изображения) */
-    margin-top: 20px; /* Небольшой отступ от навигации, если нужно */
-    margin-bottom: 20px; /* Небольшой отступ перед следующим контентом */
-}
-
-.header-image {
-    width: 1440px; /* Фиксированная ширина, как вы указали */
-    height: 484px; /* Фиксированная высота, как вы указали */
-    object-fit: cover; /* Обрезает изображение, чтобы оно заполнило контейнер, сохраняя пропорции */
-    display: block; /* Убирает лишний пробел под изображением */
-    max-width: 100%; /* Убедитесь, что изображение не выходит за пределы экрана на маленьких устройствах */
-    height: auto; /* Позволяет высоте адаптироваться, если ширина уменьшается из-за max-width */
-}
-
-/* Медиа-запросы для адаптивности, если изображение не должно быть таким большим на маленьких экранах */
-@media (max-width: 1440px) {
-    .header-image {
-        width: 100%; /* Если экран меньше 1440px, изображение займет 100% ширины */
-        height: auto; /* Высота будет автоматически подстраиваться */
     }
 }
