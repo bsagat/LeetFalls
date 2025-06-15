@@ -42,7 +42,7 @@ func (h *CatalogHandler) ServeMainPage(w http.ResponseWriter, r *http.Request) {
 // Serve post from catalog page
 func (h *CatalogHandler) ServeCatalogPost(w http.ResponseWriter, r *http.Request) {
 	postId := r.PathValue("id")
-	code, err := h.postServ.ShowPost(w, postId)
+	code, err := h.postServ.ShowPost(w, postId, false)
 	if err != nil {
 		slog.Error("Failed to show post page: ", "error", err.Error())
 		ErrorPage(w, errors.New("post showcase error: "+err.Error()), int(code))
@@ -140,8 +140,8 @@ func (h *CatalogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Main page show
-	code, err = h.postServ.ShowPost(w, r.FormValue("postID"))
+	// Post page show
+	code, err = h.postServ.ShowPost(w, r.FormValue("postID"), false)
 	if err != nil {
 		slog.Error("Failed to show post page: ", "error", err.Error())
 		ErrorPage(w, errors.New("post showcase error: "+err.Error()), int(code))

@@ -37,5 +37,11 @@ func (h *ArchiveHandler) ServeArchivePage(w http.ResponseWriter, r *http.Request
 }
 
 func (h *ArchiveHandler) ServeArchivePost(w http.ResponseWriter, r *http.Request) {
-
+	postId := r.PathValue("id")
+	code, err := h.postServ.ShowPost(w, postId, true)
+	if err != nil {
+		slog.Error("Failed to show post page: ", "error", err.Error())
+		ErrorPage(w, errors.New("post showcase error: "+err.Error()), int(code))
+		return
+	}
 }

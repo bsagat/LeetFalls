@@ -100,6 +100,15 @@ func (s *AuthService) ChangeUserName(userId int, userName string) error {
 	return nil
 }
 
+func (s *AuthService) GetUserById(id int) (models.User, error) {
+	user, err := s.dbrepo.GetUserById(id)
+	if err != nil {
+		slog.Error("Failed to get user by id: ", "error", err.Error())
+		return user, err
+	}
+	return user, nil
+}
+
 // Generates session_id randomly
 func GenerateSessionID() (string, error) {
 	bytes := make([]byte, 16)

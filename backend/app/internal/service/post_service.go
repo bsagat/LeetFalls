@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	dbrepo "leetFalls/internal/adapters/dbRepo"
@@ -12,18 +13,23 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type PostService struct {
 	AuthService AuthService
 	storage     storage.GonIO
-	authRepo    dbrepo.AuthRepo
 	commentRepo dbrepo.CommentRepo
 	repo        dbrepo.PostsRepo
 }
 
-func NewPostService(AuthService AuthService, storage storage.GonIO, repo dbrepo.PostsRepo) *PostService {
-	return &PostService{AuthService: AuthService, storage: storage, repo: repo}
+func NewPostService(authService AuthService, storage storage.GonIO, repo dbrepo.PostsRepo, commentRepo dbrepo.CommentRepo) *PostService {
+	return &PostService{
+		AuthService: authService,
+		storage:     storage,
+		repo:        repo,
+		commentRepo: commentRepo,
+	}
 }
 
 func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content string, file multipart.File, cookie *http.Cookie) (domain.Code, error) {
@@ -74,7 +80,7 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 	return http.StatusCreated, nil
 }
 
-func (s *PostService) ShowPost(w http.ResponseWriter, postId string) (domain.Code, error) {
+func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive bool) (domain.Code, error) {
 	id, err := strconv.Atoi(postId)
 	if err != nil {
 		return http.StatusBadRequest, domain.ErrInvalidPostId
@@ -88,10 +94,17 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string) (domain.Cod
 		return http.StatusNotFound, domain.ErrPostNotFound
 	}
 
+	now := time.Now()
+	if archive && post.ExpiresAt.After(now) {
+		return http.StatusBadRequest, errors.New("post is still active")
+	}
+	if !archive && post.ExpiresAt.Before(now) {
+		return http.StatusBadRequest, errors.New("post is archived")
+	}
+
 	// Author information fetching
-	author, err := s.authRepo.GetUserById(post.AuthorID)
+	author, err := s.AuthService.GetUserById(post.AuthorID)
 	if err != nil {
-		slog.Error("Failed to get user by id: ", "error", err.Error())
 		return http.StatusInternalServerError, err
 	}
 

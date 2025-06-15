@@ -18,8 +18,8 @@ type CommentService struct {
 	commentRepo dbrepo.CommentRepo
 }
 
-func NewCommentService(dbrepo dbrepo.AuthRepo, storage storage.GonIO) *CommentService {
-	return &CommentService{dbrepo: dbrepo, storage: storage}
+func NewCommentService(dbrepo dbrepo.AuthRepo, storage storage.GonIO, commentRepo dbrepo.CommentRepo) *CommentService {
+	return &CommentService{dbrepo: dbrepo, storage: storage, commentRepo: commentRepo}
 }
 
 func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, content string, file io.Reader) (domain.Code, error) {

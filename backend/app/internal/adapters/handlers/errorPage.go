@@ -1,13 +1,17 @@
 package handlers
 
 import (
+	"errors"
+	"html/template"
 	"leetFalls/internal/domain"
 	"log/slog"
 	"net/http"
-	"text/template"
 )
 
 func ErrorPage(w http.ResponseWriter, message error, code int) error {
+	if message == nil {
+		return errors.New("error message is empty")
+	}
 	data := struct {
 		Code    int
 		Message string
