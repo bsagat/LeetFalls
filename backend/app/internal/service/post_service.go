@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"html/template"
 	dbrepo "leetFalls/internal/adapters/dbRepo"
 	"leetFalls/internal/adapters/storage"
 	"leetFalls/internal/domain"
@@ -9,17 +10,20 @@ import (
 	"log/slog"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
 type PostService struct {
-	sessionServ MiddlewareService
+	AuthService AuthService
 	storage     storage.GonIO
+	authRepo    dbrepo.AuthRepo
+	commentRepo dbrepo.CommentRepo
 	repo        dbrepo.PostsRepo
 }
 
-func NewPostService(sessionServ MiddlewareService, storage storage.GonIO) *PostService {
-	return &PostService{sessionServ: sessionServ, storage: storage}
+func NewPostService(AuthService AuthService, storage storage.GonIO, repo dbrepo.PostsRepo) *PostService {
+	return &PostService{AuthService: AuthService, storage: storage, repo: repo}
 }
 
 func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content string, file multipart.File, cookie *http.Cookie) (domain.Code, error) {
@@ -38,15 +42,14 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 	}
 
 	// Cookie session_id validation
-	userId, err := s.sessionServ.Auth(w, cookie)
+	userId, err := s.AuthService.Auth(w, cookie)
 	if err != nil {
 		slog.Error("User authorization check failed: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	// User name modification
-	err = s.sessionServ.dbrepo.ChangeUserName(userId, userName)
-	if err != nil {
+	if err := s.AuthService.ChangeUserName(userId, userName); err != nil {
 		slog.Error("Failed to change user name: ", "error", err.Error())
 		return http.StatusInternalServerError, err
 	}
@@ -67,7 +70,111 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 		}
 	}
 
+	slog.Info(fmt.Sprintf("Post with id %d created succesfuly", post.ID))
 	return http.StatusCreated, nil
+}
+
+func (s *PostService) ShowPost(w http.ResponseWriter, postId string) (domain.Code, error) {
+	id, err := strconv.Atoi(postId)
+	if err != nil {
+		return http.StatusBadRequest, domain.ErrInvalidPostId
+	}
+
+	post, err := s.repo.GetPost(id)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if post.ID == 0 {
+		return http.StatusNotFound, domain.ErrPostNotFound
+	}
+
+	// Author information fetching
+	author, err := s.authRepo.GetUserById(post.AuthorID)
+	if err != nil {
+		slog.Error("Failed to get user by id: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	// Post comments fetching
+	comments, err := s.commentRepo.GetCommentsByPost(id)
+	if err != nil {
+		slog.Error("Failed to get comments by post: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/post.html")
+	if err != nil {
+		slog.Error("Failed to serve post page: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	data := struct {
+		AuthorImageURL string
+		AuthorName     string
+		CreatedAt      string
+		ID             int
+		ImageLink      string
+		Title          string
+		Content        string
+		Comments       []models.Comment
+	}{
+		AuthorImageURL: author.ImageURL,
+		AuthorName:     author.Name,
+		CreatedAt:      post.CreatedAt.Format("02 January 2006, 15:04:05 UTC"),
+		ID:             post.ID,
+		ImageLink:      post.ImageLink,
+		Title:          post.Title,
+		Content:        post.Content,
+		Comments:       comments,
+	}
+
+	if err := temp.Execute(w, data); err != nil {
+		slog.Error("Failed to execute post page: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+	return http.StatusOK, nil
+}
+
+func (s *PostService) ShowCatalogWithPosts(w http.ResponseWriter) (domain.Code, error) {
+	posts, err := s.repo.ActivePosts()
+	if err != nil {
+		slog.Error("Failed to get active posts from database: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/main_page.html")
+	if err != nil {
+		slog.Error("Failed to serve main page: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	if err := temp.Execute(w, posts); err != nil {
+		slog.Error("Failed to execute posts on main page: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func (s *PostService) ShowArchiveWithPosts(w http.ResponseWriter) (domain.Code, error) {
+	posts, err := s.repo.ArchivePosts()
+	if err != nil {
+		slog.Error("Failed to get archive posts from database: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/archive.html")
+	if err != nil {
+		slog.Error("Failed to serve archive page: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	if err := temp.Execute(w, posts); err != nil {
+		slog.Error("Failed to execute posts on archive page: ", "error", err.Error())
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }
 
 func PostValidation(post models.Post) error {

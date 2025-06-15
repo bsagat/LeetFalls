@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	dbrepo "leetFalls/internal/adapters/dbRepo"
 	"leetFalls/internal/adapters/external"
 	"leetFalls/internal/domain/models"
@@ -12,21 +13,21 @@ import (
 	"time"
 )
 
-type MiddlewareService struct {
-	dbrepo   dbrepo.SessionRepo
+type AuthService struct {
+	dbrepo   dbrepo.AuthRepo
 	external external.GravityFallsAPI
+}
+
+func NewAuthService(dbrepo dbrepo.AuthRepo, external external.GravityFallsAPI) *AuthService {
+	return &AuthService{dbrepo: dbrepo, external: external}
 }
 
 // Validates the session cookie. If valid, it retrieves and returns the current user's ID.
 // If the cookie is missing, invalid, or expired,
 // a new session is created (for an unauthenticated/guest user) and its associated user ID is returned.
-func (s *MiddlewareService) Auth(w http.ResponseWriter, cookie *http.Cookie) (int, error) {
-	if cookie != nil {
-		session_id, err := CheckSessionId(cookie.Value)
-		if err != nil {
-			slog.Error("Session id is invalid: ", "error", err.Error())
-			return 0, err
-		}
+func (s *AuthService) Auth(w http.ResponseWriter, cookie *http.Cookie) (int, error) {
+	if cookie != nil && CheckSessionId(cookie.Value) {
+		session_id := cookie.Value
 		userId, err := s.dbrepo.GetUserIDBySession(session_id)
 		if err != nil {
 			slog.Error("Failed to check session existence: ", "error", err.Error())
@@ -39,7 +40,7 @@ func (s *MiddlewareService) Auth(w http.ResponseWriter, cookie *http.Cookie) (in
 		}
 	}
 
-	// if session id not exist, we generate new user
+	// if session id not exist or invalid, we generate new user
 	session_id, err := GenerateSessionID()
 	if err != nil {
 		slog.Error("Failed to generate session id: ", "error", err.Error())
@@ -63,7 +64,7 @@ func (s *MiddlewareService) Auth(w http.ResponseWriter, cookie *http.Cookie) (in
 }
 
 // Creates a new user and returns their ID.
-func (s *MiddlewareService) CreateNewUser(sessionId string) (int, error) {
+func (s *AuthService) CreateNewUser(sessionId string) (int, error) {
 	var (
 		user models.User
 		err  error
@@ -86,7 +87,17 @@ func (s *MiddlewareService) CreateNewUser(sessionId string) (int, error) {
 		return 0, err
 	}
 
+	slog.Info(fmt.Sprintf("User with id %d created succesfully", user.ID))
 	return user.ID, nil
+}
+
+func (s *AuthService) ChangeUserName(userId int, userName string) error {
+	// User name modification
+	if err := s.dbrepo.ChangeUserName(userId, userName); err != nil {
+		slog.Error("Failed to change user name: ", "error", err.Error())
+		return err
+	}
+	return nil
 }
 
 // Generates session_id randomly
@@ -98,20 +109,12 @@ func GenerateSessionID() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-// Validates session id, if it invalid, generates new one
-func CheckSessionId(session_id string) (string, error) {
-	// session_id must not contain double hyphens (--)
-	if strings.Contains(session_id, "--") {
-		session_id = ""
+// Validates session id
+func CheckSessionId(session_id string) bool {
+	// session_id must not contain double hyphens (--) or empty
+	if strings.Contains(session_id, "--") || len(session_id) == 0 {
+		return false
 	}
 
-	if len(session_id) == 0 {
-		generated, err := GenerateSessionID()
-		if err != nil {
-			return "", err
-		}
-		return generated, nil
-	}
-
-	return session_id, nil
+	return true
 }
