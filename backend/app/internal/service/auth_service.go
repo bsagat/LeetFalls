@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	dbrepo "leetFalls/internal/adapters/dbRepo"
+	"leetFalls/internal/adapters/external"
+	"leetFalls/internal/domain/models"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -11,7 +13,8 @@ import (
 )
 
 type MiddlewareService struct {
-	dbrepo dbrepo.SessionRepo
+	dbrepo   dbrepo.SessionRepo
+	external external.GravityFallsAPI
 }
 
 // Validates the session cookie. If valid, it retrieves and returns the current user's ID.
@@ -36,7 +39,12 @@ func (s *MiddlewareService) Auth(w http.ResponseWriter, cookie *http.Cookie) (in
 		}
 	}
 
+	// if session id not exist, we generate new user
 	session_id, err := GenerateSessionID()
+	if err != nil {
+		slog.Error("Failed to generate session id: ", "error", err.Error())
+		return 0, err
+	}
 
 	userId, err := s.CreateNewUser(session_id)
 	if err != nil {
@@ -56,9 +64,29 @@ func (s *MiddlewareService) Auth(w http.ResponseWriter, cookie *http.Cookie) (in
 
 // Creates a new user and returns their ID.
 func (s *MiddlewareService) CreateNewUser(sessionId string) (int, error) {
-	var userId int
-	// New user add business logic
-	return userId, nil
+	var (
+		user models.User
+		err  error
+	)
+
+	user.Token_ID = sessionId
+	user.ID, err = s.dbrepo.GetNextUserId()
+	if err != nil {
+		slog.Error("Failed to get next user id: ", "error", err.Error())
+		return 0, err
+	}
+
+	if err := s.external.SetUser(&user); err != nil {
+		slog.Error("Failed to set user information with external data: ", "error", err.Error())
+		return 0, err
+	}
+
+	if err := s.dbrepo.SaveUser(user); err != nil {
+		slog.Error("Failed to save user information: ", "error", err.Error())
+		return 0, err
+	}
+
+	return user.ID, nil
 }
 
 // Generates session_id randomly
