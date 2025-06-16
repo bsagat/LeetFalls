@@ -10,6 +10,10 @@ type AuthRepo struct {
 	Db *sql.DB
 }
 
+func NewAuthRepo(Db *sql.DB) *AuthRepo {
+	return &AuthRepo{Db: Db}
+}
+
 func (repo *AuthRepo) GetUserIDBySession(sessionID string) (int, error) {
 	var userID int
 	err := repo.Db.QueryRow(`

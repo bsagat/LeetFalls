@@ -41,7 +41,6 @@ func (storage *GonIO) InitBuckets() error {
 		if err != nil {
 			return fmt.Errorf("failed to create new request: %w", err)
 		}
-		defer req.Body.Close()
 
 		client := &http.Client{Timeout: 5 * time.Second}
 		resp, err := client.Do(req)
@@ -51,8 +50,8 @@ func (storage *GonIO) InitBuckets() error {
 		defer resp.Body.Close()
 
 		// error can be raised if bucket is already exist...
-		if resp.StatusCode != http.StatusCreated {
-			return fmt.Errorf("unexpected status code: %d, expected: %d", resp.StatusCode, http.StatusCreated)
+		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusConflict {
+			return fmt.Errorf("unexpected status code: %d, expected: %d or %d", resp.StatusCode, http.StatusCreated, http.StatusConflict)
 		}
 	}
 	return nil

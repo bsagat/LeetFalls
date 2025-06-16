@@ -14,8 +14,8 @@ type CatalogHandler struct {
 	authServ    service.AuthService
 }
 
-func NewCatalogHandler(postServ service.PostService, authServ service.AuthService) *CatalogHandler {
-	return &CatalogHandler{postServ: postServ, authServ: authServ}
+func NewCatalogHandler(postServ service.PostService, authServ service.AuthService, commentServ service.CommentService) *CatalogHandler {
+	return &CatalogHandler{postServ: postServ, authServ: authServ, commentServ: commentServ}
 }
 
 // Shows catalog page with posts

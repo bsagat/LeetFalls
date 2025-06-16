@@ -1,10 +1,15 @@
 package app
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
+	dbrepo "leetFalls/internal/adapters/dbRepo"
+	"leetFalls/internal/adapters/external"
 	"leetFalls/internal/adapters/handlers"
+	"leetFalls/internal/adapters/storage"
 	"leetFalls/internal/domain"
+	"leetFalls/internal/service"
 	"log"
 	"log/slog"
 	"net/http"
@@ -34,7 +39,10 @@ func SetConfigs() {
 	domain.Config.DatabaseDsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 	domain.Config.TemplatesPath = "LeetFalls/frontend/templates" // Default templates path
-
+	domain.Config.StorageHost = os.Getenv("S3_HOST")
+	domain.Config.StoragePort = os.Getenv("S3_PORT")
+	domain.Config.GravityFallsHost = os.Getenv("GRAVITYFALLS_HOST")
+	domain.Config.GravityFallsPort = os.Getenv("GRAVITYFALLS_PORT")
 }
 
 func SetLogger() func() error {
@@ -50,7 +58,7 @@ func SetLogger() func() error {
 	// but it does not allow you to configure different log levels (INFO,DEBUG,WARN...)
 
 	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
-		Level: slog.LevelInfo, // it can be switched to debug level :)
+		Level: slog.LevelInfo, // it can be switched to debug level
 	})
 
 	logger := slog.New(handler)
@@ -60,10 +68,36 @@ func SetLogger() func() error {
 	return file.Close
 }
 
+func ConnectAdapters() (*sql.DB, *storage.GonIO, *external.GravityFallsAPI) {
+	storage, err := storage.InitStorage(domain.Config.StorageHost, domain.Config.StoragePort)
+	if err != nil {
+		log.Fatal("Failed to connect s3 storage: ", err)
+	}
+
+	db, err := dbrepo.Connect()
+	if err != nil {
+		log.Fatal("Failed to connect Database: ", err)
+	}
+
+	external := external.NewGravityFallsAPI(domain.Config.StorageHost, domain.Config.StoragePort)
+
+	return db, storage, external
+}
+
 func SetRouter() *http.ServeMux {
-	catalogH := handlers.NewCatalogHandler()
+	db, storage, external := ConnectAdapters()
+
+	commentRepo := dbrepo.NewCommentRepo(db)
+	postRepo := dbrepo.NewPostsRepo(db)
+	authRepo := dbrepo.NewAuthRepo(db)
+
+	authServ := service.NewAuthService(*authRepo, *external)
+	commentServ := service.NewCommentService(*authRepo, *storage, *commentRepo)
+	postServ := service.NewPostService(*authServ, *storage, *postRepo, *commentRepo)
+
+	catalogH := handlers.NewCatalogHandler(*postServ, *authServ, *commentServ)
+	archiveH := handlers.NewArchiveHandler(*postServ, *authServ)
 	profileH := handlers.NewProfileHandler()
-	archiveH := handlers.NewArchiveHandler()
 
 	mux := http.NewServeMux()
 

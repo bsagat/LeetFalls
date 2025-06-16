@@ -14,12 +14,12 @@ import (
 
 type CommentService struct {
 	storage     storage.GonIO
-	dbrepo      dbrepo.AuthRepo
+	authRepo    dbrepo.AuthRepo
 	commentRepo dbrepo.CommentRepo
 }
 
-func NewCommentService(dbrepo dbrepo.AuthRepo, storage storage.GonIO, commentRepo dbrepo.CommentRepo) *CommentService {
-	return &CommentService{dbrepo: dbrepo, storage: storage, commentRepo: commentRepo}
+func NewCommentService(authRepo dbrepo.AuthRepo, storage storage.GonIO, commentRepo dbrepo.CommentRepo) *CommentService {
+	return &CommentService{authRepo: authRepo, storage: storage, commentRepo: commentRepo}
 }
 
 func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, content string, file io.Reader) (domain.Code, error) {
@@ -45,7 +45,7 @@ func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, con
 	}
 
 	// User data parsing
-	user, err := s.dbrepo.GetUserById(authorId)
+	user, err := s.authRepo.GetUserById(authorId)
 	if err != nil {
 		slog.Error("Failed to get user data by id: ", "error", err.Error())
 		return http.StatusInternalServerError, err
