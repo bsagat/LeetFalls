@@ -1,0 +1,708 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GonIO",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://0.0.0.0:9090/",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/PING": {
+      "get": {
+        "summary": "Server Health Check",
+        "description": "Returns a simple \"PONG\" message to verify the server is up and running.",
+        "tags": [
+          "Health"
+        ],
+        "operationId": "HealthCheck",
+        "responses": {
+          "200": {
+            "description": "Server is healthy and responsive.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "PONG"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Server is unhealthy or encountered an unexpected error."
+          }
+        }
+      }
+    },
+    "/buckets": {
+      "get": {
+        "summary": "List Buckets",
+        "description": "Retrieves a list of all existing buckets.",
+        "tags": [
+          "Bucket"
+        ],
+        "operationId": "ListBuckets",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved list of buckets.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "xml": {
+                    "name": "BucketList"
+                  },
+                  "items": {
+                    "type": "object",
+                    "xml": {
+                      "name": "Bucket"
+                    },
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "description": "Bucket name",
+                        "xml": {
+                          "name": "Name"
+                        },
+                        "example": "kairatNurtasPhotos"
+                      },
+                      "CreationTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Bucket creation timestamp",
+                        "xml": {
+                          "name": "CreationTime"
+                        },
+                        "example": "2025-06-19T14:58:59.000Z"
+                      },
+                      "LastModifiedTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Bucket last modification timestamp",
+                        "xml": {
+                          "name": "LastModifiedTime"
+                        },
+                        "example": "2025-06-19T14:59:11.000Z"
+                      },
+                      "Status": {
+                        "type": "string",
+                        "description": "Current bucket status",
+                        "enum": [
+                          "Active",
+                          "Marked for deletion"
+                        ],
+                        "xml": {
+                          "name": "Status"
+                        },
+                        "example": "Active"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/objects/{BucketName}": {
+      "get": {
+        "summary": "List Objects in Bucket",
+        "description": "Returns all objects contained within the specified bucket.",
+        "tags": [
+          "Object"
+        ],
+        "operationId": "ListObjects",
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object list retrieved successfully.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "xml": {
+                    "name": "ObjectsList"
+                  },
+                  "items": {
+                    "type": "object",
+                    "xml": {
+                      "name": "Object"
+                    },
+                    "properties": {
+                      "ObjectKey": {
+                        "type": "string",
+                        "description": "Name of the object (key)",
+                        "xml": {
+                          "name": "ObjectKey"
+                        },
+                        "example": "kairosh.png"
+                      },
+                      "Size": {
+                        "type": "integer",
+                        "description": "Size of the object in bytes",
+                        "xml": {
+                          "name": "Size"
+                        },
+                        "example": 270196
+                      },
+                      "ContentType": {
+                        "type": "string",
+                        "description": "MIME type of the object",
+                        "xml": {
+                          "name": "ContentType"
+                        },
+                        "example": "image/png"
+                      },
+                      "LastModifiedTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp of last modification",
+                        "xml": {
+                          "name": "LastModifiedTime"
+                        },
+                        "example": "2025-06-19T14:59:11.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bucket not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/buckets/{BucketName}": {
+      "put": {
+        "summary": "Create Bucket",
+        "description": "Creates a new bucket with the specified name.",
+        "tags": [
+          "Bucket"
+        ],
+        "operationId": "CreateBucket",
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Bucket created successfully.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "description": "Generic response message structure",
+                  "xml": {
+                    "name": "Response"
+                  },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Operation result message",
+                      "example": "bucket created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A bucket with this name already exists.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "name must be unique"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Bucket",
+        "description": "Deletes the specified bucket.",
+        "tags": [
+          "Bucket"
+        ],
+        "operationId": "DeleteBucket",
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bucket deleted successfully.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "description": "Generic response message structure",
+                  "xml": {
+                    "name": "Response"
+                  },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Operation result message",
+                      "example": "bucket created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bucket not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/objects/{BucketName}/{ObjectKey}": {
+      "get": {
+        "summary": "Retrieve Object",
+        "description": "Retrieves a specific object from the given bucket.",
+        "tags": [
+          "Object"
+        ],
+        "operationId": "RetrieveObject",
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          },
+          {
+            "name": "ObjectKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairosh.png"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object retrieved successfully.",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket or object name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bucket or object not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Upload or Replace Object",
+        "description": "Uploads a new object or replaces an existing one in the specified bucket.",
+        "tags": [
+          "Object"
+        ],
+        "operationId": "UploadObject",
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          },
+          {
+            "name": "ObjectKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairosh.png"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/*": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Object uploaded or replaced successfully.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "description": "Generic response message structure",
+                  "xml": {
+                    "name": "Response"
+                  },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Operation result message",
+                      "example": "bucket created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket or object name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bucket not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Object",
+        "description": "Deletes a specific object from the given bucket.",
+        "tags": [
+          "Object"
+        ],
+        "operationId": "DeleteObject",
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          },
+          {
+            "name": "ObjectKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairosh.png"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Object deleted successfully.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "description": "Generic response message structure",
+                  "xml": {
+                    "name": "Response"
+                  },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Operation result message",
+                      "example": "bucket created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket or object name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bucket or object not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/objects/{BucketName}/jar": {
+      "get": {
+        "summary": "Upload Object jar",
+        "operationId": "UploadObjectJar",
+        "tags": [
+          "Object"
+        ],
+        "parameters": [
+          {
+            "name": "BucketName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "kairatNurtasPhotos"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Object jar uploaded successfully.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "description": "Generic response message structure",
+                  "xml": {
+                    "name": "Response"
+                  },
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Operation result message",
+                      "example": "bucket created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bucket or object name is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket name is empty"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bucket or object not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "bucket does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

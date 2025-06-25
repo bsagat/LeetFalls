@@ -6,6 +6,7 @@ import (
 	csvparser "GonIO/pkg/myCSV"
 	"encoding/csv"
 	"errors"
+	"flag"
 	"log"
 	"log/slog"
 	"os"
@@ -14,36 +15,67 @@ import (
 )
 
 func init() {
-	log.Println("Starting config loading...")
-	if err := envzilla.Loader(".env"); err != nil {
-		log.Fatalf("Configs loading error: %s", err.Error())
+	slog.Info("Starting config loading...")
+	if err := LoadConfig(); err != nil {
+		log.Fatal("Configs loading error: ", err)
 	}
 
 	if err := ParseConfig(); err != nil {
-		log.Fatalf("Config validation error: %s", err.Error())
+		log.Fatal("Config parsing error: ", err)
 	}
-	log.Println("Config loading finished...")
+	slog.Info("Config loading finished...")
 
-	log.Println("Metadata file check...")
+	slog.Info("STORAGE: Metadata file check...")
 
 	CheckDir()
 	CreateMetaData()
 
-	log.Println("Everything is OK...")
+	slog.Info("Everything is OK...")
+}
+
+func LoadConfig() error {
+	slog.Info("Start reading config file...")
+	err := envzilla.Loader("configs/.env")
+	if errors.Is(err, os.ErrNotExist) {
+		slog.Warn("Config file is not exist...")
+	} else {
+		return nil
+	}
+
+	slog.Info("Set cmd arguments...")
+	portFlag := flag.String("port", "9090", "Default port number")
+	hostFlag := flag.String("host", "0.0.0.0", "Default server host")
+	bucketsPathFlag := flag.String("dir", "data", "Default buckets path")
+	flag.Parse()
+
+	flags := map[string]*string{
+		"PORT":       portFlag,
+		"HOST":       hostFlag,
+		"BUCKETPATH": bucketsPathFlag,
+	}
+
+	for key, flag := range flags {
+		if err := os.Setenv(key, *flag); err != nil {
+			slog.Error("Failed to set flag arguments: ", "error", err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func ParseConfig() error {
 	domain.Port = os.Getenv("PORT")
-	domain.URLDomain = os.Getenv("DOMAIN")
+	domain.Host = os.Getenv("HOST")
 	domain.BucketsPath = os.Getenv("BUCKETPATH")
 
-	if len(domain.URLDomain) == 0 {
+	if len(domain.Host) == 0 {
 		return domain.ErrEmptyDomain
 	}
 
 	portInt, err := strconv.Atoi(domain.Port)
 	if err != nil {
-		slog.Debug("Port convert error: ", "portNum", portInt, "Errmessage", err.Error())
+		slog.Debug("Port convert error: ", "portNum", portInt, "error", "invalid port number")
 		return domain.ErrInvalidPortStr
 	}
 
@@ -63,7 +95,7 @@ func CreateMetaData() {
 	domain.BucketsMetaPath = domain.BucketsPath + "/buckets.csv"
 
 	empty, err := csvparser.CheckEmpty(domain.BucketsMetaPath)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err != nil {
 		log.Fatal("Failed to read bucket metadata : ", err.Error())
 	}
 

@@ -2,7 +2,7 @@ package domain
 
 var (
 	Port            string
-	URLDomain       string
+	Host            string
 	BucketsPath     string
 	BucketsMetaPath string
 )

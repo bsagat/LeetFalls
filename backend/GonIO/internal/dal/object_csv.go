@@ -5,14 +5,13 @@ import (
 	csvparser "GonIO/pkg/myCSV"
 	"encoding/csv"
 	"io"
-	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
 
-type ObjectCSV struct {
-}
+type ObjectCSV struct{}
 
 func NewObjectCSVRepo() *ObjectCSV {
 	return &ObjectCSV{}
@@ -20,29 +19,26 @@ func NewObjectCSVRepo() *ObjectCSV {
 
 var _ domain.ObjectDal = (*ObjectCSV)(nil)
 
-func (repo ObjectCSV) List_Object(bucketname string) (domain.ObjectsList, error) {
-	empty := domain.ObjectsList{}
-	metafile, err := os.OpenFile(domain.BucketsPath+"/"+bucketname+"/objects.csv", os.O_RDWR, 0o666)
+func (repo ObjectCSV) ListObjects(bucketname string) ([]domain.Object, error) {
+	metaPath := filepath.Join(domain.BucketsPath, bucketname, "objects.csv")
+	metaFile, err := os.Open(metaPath)
 	if err != nil {
-		return empty, err
+		return nil, err
 	}
-	defer metafile.Close()
+	defer metaFile.Close()
 
-	reader := csv.NewReader(metafile)
+	reader := csv.NewReader(metaFile)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return empty, err
+		return nil, err
 	}
 
-	var Objects []domain.Object
+	var objects []domain.Object
 	for i, record := range records {
-		if i == 0 {
+		if i == 0 || len(record) < 4 {
 			continue
 		}
-		if len(record) < 4 {
-			continue
-		}
-		Objects = append(Objects, domain.Object{
+		objects = append(objects, domain.Object{
 			ObjectKey:    record[0],
 			Size:         record[1],
 			ContentType:  record[2],
@@ -50,91 +46,73 @@ func (repo ObjectCSV) List_Object(bucketname string) (domain.ObjectsList, error)
 		})
 	}
 
-	objectlist := domain.ObjectsList{Objects: Objects}
-	return objectlist, nil
+	return objects, nil
 }
 
-func (repo ObjectCSV) UploadObject(bucketname, objectname string, r *http.Request) error {
-	file, err := os.OpenFile(domain.BucketsPath+"/"+bucketname+"/"+objectname, os.O_CREATE, 0o666)
+func (repo ObjectCSV) UploadObject(bucketname, objectname string, image io.ReadCloser, contentLen int64, fileType string) error {
+	defer image.Close()
+
+	objectPath := filepath.Join(domain.BucketsPath, bucketname, objectname)
+	file, err := os.OpenFile(objectPath, os.O_CREATE|os.O_WRONLY, 0o666)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	if _, err = io.Copy(file, r.Body); err != nil {
+	if _, err = io.Copy(file, image); err != nil {
 		return err
 	}
 
-	date := time.Now()
-	Metafile, err := os.OpenFile(domain.BucketsPath+"/"+bucketname+"/objects.csv", os.O_APPEND|os.O_WRONLY, 0o644)
+	now := time.Now()
+	metaPath := filepath.Join(domain.BucketsPath, bucketname, "objects.csv")
+	metaFile, err := os.OpenFile(metaPath, os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
-	}
-	defer Metafile.Close()
-
-	filetype := r.Header.Get("Content-Type")
-	data := []string{objectname, strconv.Itoa(int(r.ContentLength)), filetype, date.Format(time.ANSIC)}
-	defer file.Close()
-
-	if err = csvparser.WriteCSV(Metafile, data); err != nil {
-		return err
-	}
-
-	err = csvparser.ReWriteCSV(domain.BucketsMetaPath, []string{bucketname, "", date.Format(time.ANSIC), domain.ActiveMark})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo ObjectCSV) RetrieveObject(bucketname, objectname string, w http.ResponseWriter) error {
-	objectFile, err := os.Open(domain.BucketsPath + "/" + bucketname + "/" + objectname)
-	if err != nil {
-		return err
-	}
-	defer objectFile.Close()
-
-	if _, err = io.Copy(w, objectFile); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo ObjectCSV) DeleteObject(bucketname, objectname string) error {
-	date := time.Now()
-	if err := os.Remove(domain.BucketsPath + "/" + bucketname + "/" + objectname); err != nil {
-		return err
-	}
-
-	if err := csvparser.ReWriteCSV(domain.BucketsPath+"/buckets.csv", []string{bucketname, "", date.Format(time.ANSIC), domain.ActiveMark}); err != nil {
-		return err
-	}
-
-	if err := csvparser.DeleteRecord(domain.BucketsPath+"/"+bucketname+"/objects.csv", objectname); err != nil {
-		return err
-	}
-	return nil
-
-}
-
-func (repo ObjectCSV) IsObjectExist(path, name string) (bool, error) {
-	metaFile, err := os.OpenFile(path, os.O_RDWR, 0o666)
-	if err != nil {
-		return false, err
 	}
 	defer metaFile.Close()
 
-	reader := csv.NewReader(metaFile)
+	metaData := []string{objectname, strconv.Itoa(int(contentLen)), fileType, now.Format(time.ANSIC)}
+	if err = csvparser.WriteCSV(metaFile, metaData); err != nil {
+		return err
+	}
+
+	return csvparser.ReWriteCSV(domain.BucketsMetaPath, []string{bucketname, "", now.Format(time.ANSIC), domain.ActiveMark})
+}
+
+func (repo ObjectCSV) RetrieveObject(bucketname, objectname string) (io.ReadCloser, error) {
+	objectPath := filepath.Join(domain.BucketsPath, bucketname, objectname)
+	return os.Open(objectPath)
+}
+
+func (repo ObjectCSV) DeleteObject(bucketname, objectname string) error {
+	objectPath := filepath.Join(domain.BucketsPath, bucketname, objectname)
+	if err := os.Remove(objectPath); err != nil {
+		return err
+	}
+
+	now := time.Now()
+	if err := csvparser.DeleteRecord(filepath.Join(domain.BucketsPath, bucketname, "objects.csv"), objectname); err != nil {
+		return err
+	}
+
+	return csvparser.ReWriteCSV(filepath.Join(domain.BucketsPath, "buckets.csv"), []string{bucketname, "", now.Format(time.ANSIC), domain.ActiveMark})
+}
+
+func (repo ObjectCSV) IsObjectExist(csvPath, name string) (bool, error) {
+	file, err := os.Open(csvPath)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return false, err
 	}
 
-	for i := 0; i < len(records); i++ {
-		if len(records[i]) < 4 {
-			continue
-		}
-		if records[i][0] == name {
+	for _, record := range records {
+		if len(record) >= 4 && record[0] == name {
 			return true, nil
 		}
 	}

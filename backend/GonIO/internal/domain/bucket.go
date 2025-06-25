@@ -14,5 +14,5 @@ type Bucket struct {
 
 // Buckets list for XML response
 type BucketList struct {
-	Buckets []Bucket `xml:"Buckets"`
+	Buckets []Bucket `xml:"Bucket"`
 }

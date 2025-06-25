@@ -1,70 +1,91 @@
 # ☁️ GonIO — Simplified S3 Storage
 
-**GonIO** is a lightweight, simplified version of Amazon S3 (Simple Storage Service), designed for learning and experimentation. It provides a RESTful API that lets you manage **buckets** and **objects** — including creating, uploading, retrieving, and deleting files, as well as storing metadata.
+**GonIO** is a lightweight alternative to Amazon S3, designed for learning and experimentation. It provides a RESTful API to manage **buckets** and **objects**, including file upload, retrieval, deletion, and metadata storage in a simple way.
 
 ---
 
-## 🔧   Features
+## 🔧 Features
 
-Imagine a minimal web service where you can:
-
-- Create virtual containers (buckets)
-- Store and retrieve files (objects)
-- Access everything via simple HTTP calls
-
-While commercial S3 services are highly scalable and complex, **GonIO** focuses on the **core concepts** of object storage.
+- ✅ Create virtual containers (buckets)
+- ✅ Upload and retrieve objects
+- ✅ Store metadata in CSV format
+- ✅ Flexible configuration via `.env`, command-line arguments, or default values
+- ✅ Support for uploading ZIP archives
+- ✅ Name validation rules
+- ✅ Proper HTTP status codes
+- ✅ Content-Type and Content-Length support
 
 ---
 
 ## 📦 Buckets
 
-Buckets are like folders or containers for your files. Here's how to manage them:
-
 ### ✅ Create a Bucket
 - **Method:** `PUT`
-- **Endpoint:** `/{bucket-name}`
-- **Request Body:** _Empty_
-- **Constraints:** Bucket names must be 3–63 characters, lowercase, and can contain numbers, hyphens, and periods.
+- **Endpoint:** `/buckets/{bucket-name}`
+- **Body:** empty
+- **Constraints:** bucket name must be 3–63 characters, lowercase, may include numbers, hyphens, and dots
 
 ### 📄 List All Buckets
 - **Method:** `GET`
-- **Endpoint:** `/`
+- **Endpoint:** `/buckets`
 
 ### ❌ Delete a Bucket
 - **Method:** `DELETE`
-- **Endpoint:** `/{bucket-name}`
+- **Endpoint:** `/buckets/{bucket-name}`
 
 ---
 
 ## 🗂️ Objects
 
-Objects are the actual files stored inside buckets, along with metadata like content type and size.
-
 ### 📤 Upload an Object
 - **Method:** `PUT`
-- **Endpoint:** `/{bucket-name}/{object-key}`
-- **Body:** Binary data of the object
+- **Endpoint:** `/objects/{bucket-name}/{object-key}`
+- **Body:** binary data of the file
 - **Headers:**
-  - `Content-Type`: MIME type (e.g., `image/png`)
-  - `Content-Length`: Size in bytes
+  - `Content-Type`: MIME type (e.g. `image/png`)
+  - `Content-Length`: file size in bytes
 
-### 📄 List All Objects 
+### 📄 List All Objects in a Bucket
 - **Method:** `GET`
-- **Endpoint:** `/{bucket-name}`
+- **Endpoint:** `/objects/{bucket-name}`
 
 ### 📥 Retrieve an Object
 - **Method:** `GET`
-- **Endpoint:** `/{bucket-name}/{object-key}`
+- **Endpoint:** `/objects/{bucket-name}/{object-key}`
 
 ### 🗑️ Delete an Object
 - **Method:** `DELETE`
-- **Endpoint:** `/{bucket-name}/{object-key}`
+- **Endpoint:** `/objects/{bucket-name}/{object-key}`
 
 ---
 
-## 🛠️ Usage
+## 📦 Upload ZIP Archive
 
-Start the server using:
+Allows uploading a ZIP archive with images into a bucket.
 
-```bash
-$ ./gonIO 
+### 📤 Upload ZIP
+- **Method:** `POST`
+- **Endpoint:** `/{bucket-name}/upload-zip`
+- **Headers:**
+  - `Content-Type`: `application/zip`
+- **Body:** A ZIP file containing image files
+
+### Requirements:
+- Only image files allowed inside the archive (`.jpg`, `.jpeg`, `.png`)
+- Files are automatically extracted and stored as regular objects
+
+---
+
+## ⚙️ Configuration
+
+Configuration is loaded in the following order of priority:
+
+1. `.env` file
+2. Command-line arguments (`--port`, `--host`, `--dir`)
+3. Default values
+
+### Example `.env` file:
+```env
+PORT=9090
+HOST=localhost
+BUCKETPATH=data

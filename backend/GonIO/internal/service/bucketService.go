@@ -2,9 +2,7 @@ package service
 
 import (
 	"GonIO/internal/domain"
-	xmlsender "GonIO/pkg/xmlMsgSender"
-	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -18,78 +16,54 @@ func NewBucketService(dal domain.BucketDal) *BucketServiceImp {
 	return &BucketServiceImp{dal: dal}
 }
 
-// Bucket List retrieve logic
-func (serv BucketServiceImp) BucketList(w http.ResponseWriter) {
-	list, err := serv.dal.GetBucketList()
+func (s BucketServiceImp) BucketList() ([]domain.Bucket, error) {
+	buckets, err := s.dal.GetBucketList()
 	if err != nil {
-		log.Printf("Failed to get bucket list: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		slog.Error("Could not retrieve bucket list", "error", err)
+		return nil, err
 	}
-
-	if err = xmlsender.SendBucketList(w, list); err != nil {
-		log.Printf("Failed to send bucket list: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return buckets, nil
 }
 
-// Bucket create logic (validation)
-func (serv BucketServiceImp) CreateBucket(w http.ResponseWriter, bucketName string) {
-	unique, err := serv.dal.IsUniqueBucket(bucketName)
+func (s BucketServiceImp) CreateBucket(bucketName string) (int, error) {
+	isUnique, err := s.dal.IsUniqueBucket(bucketName)
 	if err != nil {
-		log.Printf("Failed to check if bucket name is unique: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		slog.Error("Failed to check bucket name uniqueness", "error", err)
+		return http.StatusInternalServerError, err
 	}
-	if !unique {
-		log.Printf("Bucket name is not unique")
-		http.Error(w, domain.ErrNotUniqueName.Error(), http.StatusConflict)
-		return
+	if !isUnique {
+		slog.Info("Bucket name already exists", "bucket", bucketName)
+		return http.StatusConflict, domain.ErrNotUniqueName
 	}
 
-	if err = Validate(bucketName); err != nil {
-		log.Printf("Bucket name validation error: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	if err := Validate(bucketName); err != nil {
+		slog.Error("Invalid bucket name", "bucket", bucketName, "error", err)
+		return http.StatusBadRequest, err
 	}
 
-	if err = serv.dal.CreateBucket(bucketName); err != nil {
-		log.Printf("Failed to create bucket: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err := s.dal.CreateBucket(bucketName); err != nil {
+		slog.Error("Failed to create bucket", "bucket", bucketName, "error", err)
+		return http.StatusInternalServerError, err
 	}
 
-	if err = xmlsender.SendMessage(w, http.StatusCreated, fmt.Sprintf("bucket with name %s created succesfully", bucketName)); err != nil {
-		log.Printf("Failed to send xml message: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return http.StatusCreated, nil
 }
 
-// Bucket Delete logic
-func (serv BucketServiceImp) DeleteBucket(w http.ResponseWriter, bucketName string) {
-	unique, err := serv.dal.IsUniqueBucket(bucketName)
+func (s BucketServiceImp) DeleteBucket(bucketName string) (int, error) {
+	isUnique, err := s.dal.IsUniqueBucket(bucketName)
 	if err != nil {
-		log.Printf("Failed to check if bucket name is unique: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		slog.Error("Failed to check bucket existence", "bucket", bucketName, "error", err)
+		return http.StatusInternalServerError, err
 	}
-	if unique {
-		log.Printf("Bucket is not exist")
-		http.Error(w, domain.ErrBucketIsNotExist.Error(), http.StatusNotFound)
-		return
+	if isUnique {
+		slog.Info("Bucket does not exist", "bucket", bucketName)
+		return http.StatusNotFound, domain.ErrBucketIsNotExist
 	}
 
-	if err = serv.dal.DeleteBucket(bucketName); err != nil {
-		log.Printf("Failed to delete bucket: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err := s.dal.DeleteBucket(bucketName); err != nil {
+		slog.Error("Failed to delete bucket", "bucket", bucketName, "error", err)
+		return http.StatusInternalServerError, err
 	}
 
-	if err = xmlsender.SendMessage(w, http.StatusOK, fmt.Sprintf("bucket with name %s deleted succesfully", bucketName)); err != nil {
-		log.Printf("Failed to send xml message: %s", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return http.StatusOK, nil
 }

@@ -15,4 +15,5 @@ var (
 	ErrNotUniqueName    = errors.New("name must be unique")
 	ErrNameLikeIpAdress = errors.New("name must not be formatted as an IP address ")
 	ErrNamePeriodOrDash = errors.New("name must not contain two consecutive periods or dashes")
+	ErrEmptyReqBody     = errors.New("request body is empty")
 )

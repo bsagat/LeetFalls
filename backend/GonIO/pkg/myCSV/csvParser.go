@@ -84,9 +84,9 @@ func WriteCSV(metaFile *os.File, data []string) error {
 }
 
 func CheckEmpty(pathToCSV string) (bool, error) {
-	metaFile, err := os.OpenFile(pathToCSV, os.O_RDWR, 0o666)
+	metaFile, err := os.OpenFile(pathToCSV, os.O_CREATE|os.O_RDWR, 0o666)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 	defer metaFile.Close()
 

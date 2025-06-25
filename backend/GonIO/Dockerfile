@@ -6,6 +6,6 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o gonIO cmd/main.go
+RUN go build -o GonIO cmd/main.go
 
-CMD ["./gonIO"]
+CMD ["./GonIO"]
