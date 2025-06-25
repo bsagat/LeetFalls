@@ -13,21 +13,18 @@ func NewCommentRepo(Db *sql.DB) *CommentRepo {
 	return &CommentRepo{Db: Db}
 }
 
-// Saves comment to database and returns his new id
-func (repo *CommentRepo) SaveComment(comm models.Comment) (int, error) {
-	var commentId int
-	if err := repo.Db.QueryRow(`
+// Saves comment to database
+func (repo *CommentRepo) SaveComment(comm models.Comment) error {
+	if _, err := repo.Db.Exec(`
 	INSERT INTO 
-		Comments (post_id, Reply_to, content, Author_id, ImageURL) 
+		Comments (ID, post_id, Reply_to, content, Author_id, ImageURL) 
 	VALUES 
-		($1, $2, $3, $4, $5)
-	RETURNING ID;`,
-		comm.PostID, comm.ReplyToID, comm.Content, comm.Author.ID, comm.ImageLink,
-	).Scan(&commentId); err != nil {
-		return 0, err
+		($1, $2, $3, $4, $5, $6);`,
+		comm.ID, comm.PostID, comm.ReplyToID, comm.Content, comm.Author.ID, comm.ImageLink,
+	); err != nil {
+		return err
 	}
-
-	return commentId, nil
+	return nil
 }
 
 func (repo *CommentRepo) GetCommentsByPost(postID int) ([]models.Comment, error) {
@@ -50,4 +47,13 @@ func (repo *CommentRepo) GetCommentsByPost(postID int) ([]models.Comment, error)
 		comments = append(comments, comment)
 	}
 	return comments, nil
+}
+
+// Gets unique comment id
+func (repo *CommentRepo) GetNextCommentId() (int, error) {
+	var id int
+	if err := repo.Db.QueryRow("SELECT COALESCE(MAX(ID), 0) + 1 FROM Comments").Scan(&id); err != nil {
+		return 0, err
+	}
+	return id, nil
 }

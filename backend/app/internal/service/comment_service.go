@@ -57,19 +57,26 @@ func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, con
 	}
 	comm.Author.ID = user.ID
 
-	// Comment database save
-	comm.ID, err = s.commentRepo.SaveComment(comm)
+	// Get next Comment ID
+	comm.ID, err = s.commentRepo.GetNextCommentId()
 	if err != nil {
-		slog.Error("Failed to save comment data: ", "error", err.Error())
+		slog.Error("Failed to get next comment id: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	// Comment Image save
 	if file != nil {
-		if err := s.storage.SaveCommentImage(comm.PostID, comm.ID, file); err != nil {
+		if err := s.storage.SaveCommentImage(&comm, file); err != nil {
 			slog.Error("Failed to save post image to storage: ", "error", err)
 			return http.StatusInternalServerError, err
 		}
+	}
+
+	// Comment database save
+	err = s.commentRepo.SaveComment(comm)
+	if err != nil {
+		slog.Error("Failed to save comment data: ", "error", err.Error())
+		return http.StatusInternalServerError, err
 	}
 
 	slog.Info(fmt.Sprintf("Comment %d on post %d created succesfully", comm.ID, comm.PostID))

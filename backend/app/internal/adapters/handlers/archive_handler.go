@@ -24,7 +24,7 @@ func (h *ArchiveHandler) ServeArchivePage(w http.ResponseWriter, r *http.Request
 
 	if _, err := h.authServ.Auth(w, cookie); err != nil {
 		slog.Error("Failed to auth user with cookie: ", "error", err.Error())
-		ErrorPage(w, errors.New("user auth error: "+err.Error()), http.StatusBadRequest)
+		ErrorPage(w, errors.New("user auth error: "+err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -38,7 +38,8 @@ func (h *ArchiveHandler) ServeArchivePage(w http.ResponseWriter, r *http.Request
 
 func (h *ArchiveHandler) ServeArchivePost(w http.ResponseWriter, r *http.Request) {
 	postId := r.PathValue("id")
-	code, err := h.postServ.ShowPost(w, postId, true)
+	isArchive := true
+	code, err := h.postServ.ShowPost(w, postId, isArchive)
 	if err != nil {
 		slog.Error("Failed to show post page: ", "error", err.Error())
 		ErrorPage(w, errors.New("post showcase error: "+err.Error()), int(code))

@@ -38,7 +38,7 @@ func SetConfigs() {
 
 	domain.Config.DatabaseDsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
-	domain.Config.TemplatesPath = "LeetFalls/frontend/templates" // Default templates path
+	domain.Config.TemplatesPath = "templates" // Default templates path
 	domain.Config.StorageHost = os.Getenv("S3_HOST")
 	domain.Config.StoragePort = os.Getenv("S3_PORT")
 	domain.Config.GravityFallsHost = os.Getenv("GRAVITYFALLS_HOST")
@@ -79,7 +79,8 @@ func ConnectAdapters() (*sql.DB, *storage.GonIO, *external.GravityFallsAPI) {
 		log.Fatal("Failed to connect Database: ", err)
 	}
 
-	external := external.NewGravityFallsAPI(domain.Config.StorageHost, domain.Config.StoragePort)
+	gravityFallsURL := domain.Config.GravityFallsHost + ":" + domain.Config.GravityFallsPort
+	external := external.NewGravityFallsAPI(gravityFallsURL, domain.Config.StoragePort)
 
 	return db, storage, external
 }
@@ -100,6 +101,9 @@ func SetRouter() *http.ServeMux {
 	profileH := handlers.NewProfileHandler()
 
 	mux := http.NewServeMux()
+
+	// Static files
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("templates"))))
 
 	// Catalog API endpoints
 	mux.HandleFunc("GET /catalog", catalogH.ServeMainPage)

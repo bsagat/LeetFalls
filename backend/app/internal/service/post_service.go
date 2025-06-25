@@ -56,24 +56,30 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 
 	// User name modification
 	if err := s.AuthService.ChangeUserName(userId, userName); err != nil {
-		slog.Error("Failed to change user name: ", "error", err.Error())
+		slog.Error("Failed to change user name: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
-	post.AuthorID = userId
+	post.Author.ID = userId
 
-	// Post save
-	post.ID, err = s.repo.SavePost(post)
+	post.ID, err = s.repo.GetNextPostId()
 	if err != nil {
-		slog.Error("Failed to save post to database: ", "error", err.Error())
+		slog.Error("Failed to get next post id: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	// Post Image save
 	if file != nil {
-		if err := s.storage.SavePostImage(post.ID, file); err != nil {
+		if err := s.storage.SavePostImage(&post, file); err != nil {
 			slog.Error("Failed to save post image to storage: ", "error", err)
 			return http.StatusInternalServerError, err
 		}
+	}
+
+	// Post save
+	err = s.repo.SavePost(post)
+	if err != nil {
+		slog.Error("Failed to save post to database: ", "error", err)
+		return http.StatusInternalServerError, err
 	}
 
 	slog.Info(fmt.Sprintf("Post with id %d created succesfuly", post.ID))
@@ -88,6 +94,7 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 
 	post, err := s.repo.GetPost(id)
 	if err != nil {
+		slog.Error("Failed to get post by ID", "postID", id, "error", err)
 		return http.StatusInternalServerError, err
 	}
 	if post.ID == 0 {
@@ -103,21 +110,22 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 	}
 
 	// Author information fetching
-	author, err := s.AuthService.GetUserById(post.AuthorID)
+	author, err := s.AuthService.GetUserById(post.Author.ID)
 	if err != nil {
+		slog.Error("Failed to get user by ID: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	// Post comments fetching
 	comments, err := s.commentRepo.GetCommentsByPost(id)
 	if err != nil {
-		slog.Error("Failed to get comments by post: ", "error", err.Error())
+		slog.Error("Failed to get comments by post: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/post.html")
 	if err != nil {
-		slog.Error("Failed to serve post page: ", "error", err.Error())
+		slog.Error("Failed to serve post page: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
@@ -142,7 +150,7 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 	}
 
 	if err := temp.Execute(w, data); err != nil {
-		slog.Error("Failed to execute post page: ", "error", err.Error())
+		slog.Error("Failed to execute post page: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
@@ -151,18 +159,18 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 func (s *PostService) ShowCatalogWithPosts(w http.ResponseWriter) (domain.Code, error) {
 	posts, err := s.repo.ActivePosts()
 	if err != nil {
-		slog.Error("Failed to get active posts from database: ", "error", err.Error())
+		slog.Error("Failed to get active posts from database: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/main_page.html")
 	if err != nil {
-		slog.Error("Failed to serve main page: ", "error", err.Error())
+		slog.Error("Failed to serve main page: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	if err := temp.Execute(w, posts); err != nil {
-		slog.Error("Failed to execute posts on main page: ", "error", err.Error())
+		slog.Error("Failed to execute posts on main page: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
@@ -172,18 +180,18 @@ func (s *PostService) ShowCatalogWithPosts(w http.ResponseWriter) (domain.Code, 
 func (s *PostService) ShowArchiveWithPosts(w http.ResponseWriter) (domain.Code, error) {
 	posts, err := s.repo.ArchivePosts()
 	if err != nil {
-		slog.Error("Failed to get archive posts from database: ", "error", err.Error())
+		slog.Error("Failed to get archive posts from database: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/archive.html")
 	if err != nil {
-		slog.Error("Failed to serve archive page: ", "error", err.Error())
+		slog.Error("Failed to serve archive page: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
 	if err := temp.Execute(w, posts); err != nil {
-		slog.Error("Failed to execute posts on archive page: ", "error", err.Error())
+		slog.Error("Failed to execute posts on archive page: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 

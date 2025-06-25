@@ -11,13 +11,14 @@ import (
 
 // Like minIO :)
 type GonIO struct {
-	url            string
+	host           string
+	port           string
 	commentDirPath string // comment images directory path
 	postsDirPath   string // post images directory path
 }
 
 func InitStorage(host, port string) (*GonIO, error) {
-	storage := &GonIO{url: host + ":" + port, commentDirPath: "comments", postsDirPath: "posts"}
+	storage := &GonIO{host: host, port: port, commentDirPath: "comments", postsDirPath: "posts"}
 	if err := storage.CheckHealth(); err != nil {
 		slog.Error("Failed to send PING message: ", "error", err.Error())
 		return nil, err
@@ -36,7 +37,7 @@ func (storage *GonIO) InitBuckets() error {
 	dirPaths := []string{storage.postsDirPath, storage.commentDirPath}
 
 	for _, path := range dirPaths {
-		url := fmt.Sprintf("%s/%s", storage.url, path)
+		url := fmt.Sprintf("%s/buckets/%s", storage.host+":"+storage.port, path)
 		req, err := http.NewRequest("PUT", url, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create new request: %w", err)
@@ -58,7 +59,7 @@ func (storage *GonIO) InitBuckets() error {
 }
 
 func (storage *GonIO) CheckHealth() error {
-	resp, err := http.Get(storage.url + "/PING")
+	resp, err := http.Get(storage.host + ":" + storage.port + "/PING")
 	if err != nil {
 		return fmt.Errorf("failed to ping storage: %w", err)
 	}

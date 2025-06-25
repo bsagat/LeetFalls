@@ -27,7 +27,7 @@ func (h *CatalogHandler) ServeMainPage(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := h.authServ.Auth(w, cookie); err != nil {
 		slog.Error("Failed to auth user with cookie: ", "error", err.Error())
-		ErrorPage(w, errors.New("user auth error: "+err.Error()), http.StatusBadRequest)
+		ErrorPage(w, errors.New("user auth error: "+err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -82,7 +82,6 @@ func (h *CatalogHandler) CreatePostHandler(w http.ResponseWriter, r *http.Reques
 	if file != nil {
 		defer file.Close()
 	}
-
 	// Business logic call
 	code, err := h.postServ.CreatePost(w, r.FormValue("Name"), r.FormValue("Title"), r.FormValue("Content"), file, cookie)
 	if err != nil {
@@ -91,12 +90,7 @@ func (h *CatalogHandler) CreatePostHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	code, err = h.postServ.ShowCatalogWithPosts(w)
-	if err != nil {
-		slog.Error("Failed to show catalog page: ", "error", err.Error())
-		ErrorPage(w, err, int(code))
-		return
-	}
+	http.Redirect(w, r, "http://localhost:8080/catalog", http.StatusSeeOther)
 }
 
 // Handles comment create
@@ -110,7 +104,7 @@ func (h *CatalogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Req
 	authorId, err := h.authServ.Auth(w, cookie)
 	if err != nil {
 		slog.Error("Failed to auth user with cookie: ", "error", err.Error())
-		ErrorPage(w, errors.New("user auth error: "+err.Error()), http.StatusBadRequest)
+		ErrorPage(w, errors.New("user auth error: "+err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -140,11 +134,5 @@ func (h *CatalogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Post page show
-	code, err = h.postServ.ShowPost(w, r.FormValue("postID"), false)
-	if err != nil {
-		slog.Error("Failed to show post page: ", "error", err.Error())
-		ErrorPage(w, errors.New("post showcase error: "+err.Error()), int(code))
-		return
-	}
+	http.Redirect(w, r, "http://localhost:8080/posts/"+r.FormValue("postID"), http.StatusSeeOther)
 }

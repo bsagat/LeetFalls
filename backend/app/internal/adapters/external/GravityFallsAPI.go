@@ -11,18 +11,19 @@ import (
 )
 
 type GravityFallsAPI struct {
-	url string
+	url    string
+	s3port string
 }
 
-func NewGravityFallsAPI(host, port string) *GravityFallsAPI {
-	return &GravityFallsAPI{url: host + ":" + port}
+func NewGravityFallsAPI(url string, s3port string) *GravityFallsAPI {
+	return &GravityFallsAPI{url: url, s3port: s3port}
 }
 
 // Associates a specific character with a user via an external API
 func (ext *GravityFallsAPI) SetUser(user *models.User) error {
 	count, err := ext.AvatarCount()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get avatar count: %w", err)
 	}
 
 	characterID := user.ID
@@ -48,7 +49,7 @@ func (ext *GravityFallsAPI) SetUser(user *models.User) error {
 	}
 
 	user.Name = character.Name
-	user.ImageURL = character.ImageURL
+	user.ImageURL = "http://127.0.0.1:" + ext.s3port + "/objects/characters/" + character.ImageURL
 
 	slog.Info("Parsed character from external API", "character", character)
 	return nil
@@ -70,6 +71,7 @@ func (ext *GravityFallsAPI) AvatarCount() (int, error) {
 	var result struct {
 		Count int `json:"Count"`
 	}
+
 	if err := json.Unmarshal(data, &result); err != nil {
 		return 0, fmt.Errorf("failed to parse JSON: %w", err)
 	}
