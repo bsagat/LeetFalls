@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="styles/error.css"> 
+    <link rel="stylesheet" href="/static/styles/error.css"> 
     <title>Memory Erased</title>
 </head>
 <body>
     <h1>Oops... Something slipped through the cracks...</h1>
     <div class="hand-wrapper">
-        <img src="images/error_hand.png" alt="Author Hand" class="hand" />
-        <div class="error-code">{{.Code}}}</div>
+        <img src="/static/images/error_hand.png" alt="Author Hand" class="hand" />
+        <div class="error-code">{{.Code}}</div>
     </div>
 
-    <div class="subtitle">{{.Message}}}. Error Code {{.Code}}.</div>
+    <div class="subtitle">{{.Message}}. Error Code {{.Code}}.</div>
 
     <div class="buttons">
         <a href="/catalog" class="btn">Memory Archive</a>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Post - LeetFalls</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courgette&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles/create-post.css"> 
+</head>
+<body>
+    <nav>
+        <a href="/profile">Profile</a>
+        <a href="#main-content">Catalog</a>
+        <a href="/">
+            <img src="/static/images/LeetFalls_icon.png" alt="LeetFalls Icon" class="nav-icon">
+        </a>
+        <a href="/archive">Archive</a>
+        <a href="/catalog/post/new">New Post</a>
+    </nav>
+
+    <main id="main-content">
+        <div class="new-post-container">
+            <div class="left-sidebar-image" id="bill-container">
+                <img src="/static/images/black_bill.png" alt="Bill Cipher Body" class="bill-body">
+                <p>"Go on, author, impress me... if you can."</p>
+            </div>
+            <div class="new-post-form-wrapper">
+                <h2>New Post</h2>
+                <form action="/submit/post" method="POST" enctype="multipart/form-data">
+                    <label for="author-name">Your name</label>
+                    <input type="text" id="author-name" name="Name" placeholder="Enter your name" required>
+
+                    <label for="post-title">Title</label>
+                    <input type="text" id="post-title" name="Title" placeholder="Enter post title" required>
+
+                    <label for="post-content">Content</label>
+                    <textarea id="post-content" name="Content" placeholder="Write your post here..." required></textarea>
+
+                    <label for="post-image">Attach Image (Optional)</label>
+                    <input type="file" id="post-image" name="File" accept="image/*">
+
+                    <button type="submit">Publish Post</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 LeetFalls. All Rights Reserved.</p>
+        <p>Authors: Sagat Bekbolat and Rakhimov Mansur</p>
+    </footer>
+
+    <div class="bill-pupil"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const billContainer = document.getElementById('bill-container');
+        const billPupil = document.querySelector('.bill-pupil');
+        const billBody = document.querySelector('.bill-body');
+
+        if (!billContainer || !billPupil || !billBody) {
+            console.warn('Bill elements not found. Pupil animation will not work.');
+            return;
+        }
+
+        let eyeOffsetX, eyeOffsetY;
+
+        function updateEyePositionInContainer() {
+            const billRect = billBody.getBoundingClientRect();
+            const containerRect = billContainer.getBoundingClientRect();
+
+            const eyeXRatioFromBillBody = 0.443;
+            const eyeYRatioFromBillBody = 0.517;
+
+            eyeOffsetX = (billRect.left - containerRect.left) + billRect.width * eyeXRatioFromBillBody;
+            eyeOffsetY = (billRect.top - containerRect.top) + billRect.height * eyeYRatioFromBillBody;
+        }
+
+        updateEyePositionInContainer();
+        window.addEventListener('resize', updateEyePositionInContainer);
+
+        document.addEventListener('mousemove', (e) => {
+            const containerRect = billContainer.getBoundingClientRect();
+            const mouseXInContainer = e.clientX - containerRect.left;
+            const mouseYInContainer = e.clientY - containerRect.top;
+
+            if (isNaN(eyeOffsetX) || isNaN(eyeOffsetY)) {
+                updateEyePositionInContainer();
+                if (isNaN(eyeOffsetX) || isNaN(eyeOffsetY)) return;
+            }
+
+            const angle = Math.atan2(mouseYInContainer - eyeOffsetY, mouseXInContainer - eyeOffsetX);
+
+            const maxPupilOffset = 10;
+
+            const offsetX = maxPupilOffset * Math.cos(angle);
+            const offsetY = maxPupilOffset * Math.sin(angle);
+
+            billPupil.style.left = `${eyeOffsetX + offsetX + 146}px`;
+            billPupil.style.top = `${eyeOffsetY + offsetY + 110}px`;
+        });
+    });
+    </script>
+</body>
+</html>

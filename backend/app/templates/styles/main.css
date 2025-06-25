@@ -5,20 +5,23 @@ body {
     color: #00ffcc;
     position: relative;
     min-height: 100vh;
+    box-sizing: border-box;
 }
+
 
 nav {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border: 1px solid #00ffcc;
-    margin: 1em;
-    border-radius: 10px;
+    border: 2px solid #00ffcc;
+    margin: 29px 0 0 50px;
+    border-radius: 15px;
 }
 
 nav a {
     color: #cccccc;
     text-decoration: none;
+    margin: 0 15px;
     font-size: 1em;
 }
 
@@ -34,13 +37,6 @@ nav a:hover {
     margin-right: 0.5em;
 }
 
-nav a strong {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-}
-
-/* === MAIN PAGE STYLES === */
 .container {
     display: flex;
     justify-content: center;
@@ -84,18 +80,6 @@ nav a strong {
     box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
 }
 
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .image-block img {
-        width: 80%;
-        height: auto;
-    }
-}
-
 .circular-image-container {
     width: 48px;
     height: 46px;
@@ -113,7 +97,7 @@ nav a strong {
 }
 
 .quote-text {
-    font-family: 'Courgette', monospace; /* Courgette font is applied here */
+    font-family: 'Courgette', monospace;
     font-size: 0.9em;
     line-height: 1.6;
     color: #cccccc;
@@ -129,12 +113,11 @@ nav a strong {
     max-width: 900px;
 }
 
-/* === POSTS SECTION=== */
 .posts-button-container {
     display: flex;
     margin-bottom: 0;
     max-width: 900px;
-    margin-left: 100px;
+    margin-left: auto;
     margin-right: auto;
     padding: 0 1em;
 }
@@ -170,19 +153,24 @@ nav a strong {
     margin-bottom: 2em;
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
-
 .posts-wrapper {
-    max-width: 900px;
-    margin-left: 95px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 95px;
-    padding: 0 1em;
-    display: flex;
-    align-items: flex-start;
-    gap: 134px;
+    padding: 0 1em; /* Обратите внимание: этот padding будет "съедать" по 1em с каждой стороны от 1110px */
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 46px; /* <-- Изменено здесь! */
+    justify-items: center;
+    align-items: start;
 }
 
 .general-post {
-    width: 277px;
+    width: 100%;
+    max-width: 280px;
+    
     height: 257px;
     border: 1px solid #ffffff;
     border-radius: 15px;
@@ -238,155 +226,6 @@ nav a strong {
     border-radius: 50%;
 }
 
-.small-posts-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.small-post-row {
-    display: flex;
-    gap: 13px;
-}
-
-.small-post {
-    width: 158px;
-    height: 120px;
-    border: 1px solid #ffffff;
-    border-radius: 8px;
-    background-color: #000000;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    position: relative;
-    flex-shrink: 0;
-}
-
-.small-post a {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    flex-grow: 1;
-    width: 100%;
-    height: 100%;
-}
-
-.small-post img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    display: block;
-}
-
-.small-post-avatar-circle {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ffffff;
-    border-radius: 50%;
-    overflow: hidden;
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.small-post-avatar-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.top-left-post {
-    border-radius: 30px 0 0 0;
-}
-.top-left-post img {
-    border-radius: 30px 0 0 0;
-}
-
-.top-right-post {
-    border-radius: 0 30px 0 0;
-}
-.top-right-post img {
-    border-radius: 0 30px 0 0;
-}
-
-.bottom-left-post {
-    border-radius: 0 0 0 30px;
-}
-.bottom-left-post img {
-    border-radius: 0 0 0 30px;
-}
-
-.bottom-right-post {
-    border-radius: 0 0 30px 0;
-}
-.bottom-right-post img {
-    border-radius: 0 0 30px 0;
-}
-
-/* Common Media Queries for responsiveness */
-@media (max-width: 950px) {
-    .posts-wrapper {
-        flex-direction: column;
-        align-items: center;
-        gap: 2em;
-        margin-left: auto;
-    }
-    .general-post {
-        margin: 0.5em auto;
-    }
-}
-
-@media (max-width: 768px) {
-    .small-post-row {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .small-post {
-        width: calc(50% - 1em);
-        max-width: 158px;
-        height: auto;
-    }
-}
-
-@media (max-width: 700px) {
-    .small-post-row {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .small-post {
-        width: calc(50% - 1em);
-        max-width: 158px;
-        height: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .posts-button-container {
-        margin-left: auto;
-        justify-content: center;
-    }
-    .posts-wrapper {
-        margin-left: auto;
-    }
-    .general-post, .small-post {
-        width: 90%;
-        height: auto;
-        margin: 0.5em auto;
-    }
-    .small-post-row {
-        flex-direction: column;
-        align-items: center;
-    }
-}
-
 footer {
     background-color: #0d0d0d;
     color: #00ffcc;
@@ -411,12 +250,66 @@ footer p {
     line-height: 1.4;
 }
 
-@media (max-width: 600px) {
-    footer {
-        font-size: 0.8em;
-        padding: 1.5em 1em;
+/* Медиа-запросы для адаптивности */
+@media (max-width: 950px) {
+    .posts-wrapper {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 3-4 поста */
+        gap: 0.8em;
     }
-    footer .footer-line {
-        width: 90%;
+    .general-post {
+        max-width: none; /* Убираем max-width, чтобы Grid мог растягивать элементы */
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .image-block img {
+        width: 100%;
+        height: auto;
+        max-width: 500px;
+    }
+    .posts-wrapper {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 2-3 поста */
+        gap: 1em;
+    }
+    .text-block {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    nav {
+        flex-wrap: wrap;
+        padding: 0.5em;
+    }
+    nav a {
+        margin: 0.5em 10px;
+        font-size: 0.9em;
+    }
+    .nav-icon {
+        height: 2.5em;
+    }
+    .text-block h1 {
+        font-size: 2.5em;
+    }
+    .tagline {
+        font-size: 1em;
+    }
+    .image-text-combo {
+        flex-direction: column;
+        text-align: center;
+    }
+    .posts-wrapper {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 1-2 поста */
+        gap: 1.5em;
+        padding: 0 0.5em;
+    }
+    .general-post {
+        height: auto; /* Позволяет высоте поста адаптироваться к содержимому на мобильных */
+        max-width: 100%;
     }
 }

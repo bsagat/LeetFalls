@@ -25,12 +25,13 @@
 
         .hand-wrapper {
             position: relative;
-            width: 160px; /* Ширина контейнера для руки */
+            width: 200px;
             height: auto; /* Установим фиксированную высоту для лучшего позиционирования кода */
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 20px;
+            transition: transform 0.4s ease;
         }
 
         .hand {
@@ -38,10 +39,10 @@
             height: auto;
             display: block; /* Убираем лишнее пространство под изображением */
             transition: transform 0.4s ease;
-            filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.5)); /* Тень от руки, хорошо смотрится на черном */
+            filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.5));
         }
 
-        .hand:hover {
+        .hand-wrapper:hover {
             transform: scale(1.05) rotate(-2deg);
         }
 
@@ -115,12 +116,12 @@
             }
             .hand-wrapper {
                 width: 120px;
-                height: 120px;
+                height: auto; /* Верните auto, если изображение может менять пропорции */
             }
             .error-code {
                 font-size: 1.8em;
                 top: 65%;
-                left: 40%;
+                left: 47%; /* Верните 47% для более точного центрирования, так как рука теперь 120px */
             }
             .subtitle {
                 font-size: 1em;

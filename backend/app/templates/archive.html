@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>LeetFalls</title>
+    <link rel="stylesheet" href="/static/styles/archive.css"> 
+    <link rel="icon" type="image/png" href="/static/images/LeetFalls_icon.png"> 
+    <link href="https://fonts.googleapis.com/css2?family=Courgette&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet"> 
+</head>
+<body>
+    <nav>
+        <a href="/profile">Profile</a>
+        <a href="/catalog">Catalog</a>
+        <a href="#"><img src="/static/images/LeetFalls_icon.png" alt="LeetFalls Icon" class="nav-icon"></a>
+        <a href="#main-content">Archive</a>
+        <a href="/catalog/post/new">New Post</a>
+    </nav>
+
+    <div class="header-image-container">
+        <img src="/static/images/archive_background.png" alt="Header Image" class="header-image">
+        
+        <div class="header-overlay-titles">
+            <p class="header-page-title">Archive Page:</p>
+            <p class="header-society-title">Society of the Blind Eye</p>
+        </div>
+
+        <div class="content-overlay-container">
+            <div class="circular-logo-container">
+                <img src="/static/images/Red_eye_logo.png" alt="Red Eye Logo" class="red-eye-logo">
+            </div>
+            <div class="overlay-text-block">
+                <p>We've infiltrated the lair of the Society of the Blind Eye.<br>
+                This is where they store erased memories—wiped from minds, from records, from reality itself.<br>
+                Retrieving remaining fragments...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="posts-button-container">
+        <a href="#" class="explore-button">Archive Posts</a>
+    </div>
+
+    <div class="white-line"></div>
+
+    <main id="main-content">
+    <div class="posts-wrapper">
+        {{range .}}
+        <div class="general-post">
+            <a href="/archive/post/{{.ID}}">
+                <img src="{{.ImageLink}}" alt="General-post img">
+            </a>
+            <div class="post-avatar-circle">
+                <img src="{{.Author.ImageURL}}" alt="Avatar">
+            </div>
+        </div>
+        {{end}}
+    </div>  
+</body>
+</html>
