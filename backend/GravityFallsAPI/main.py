@@ -2,9 +2,6 @@ from fastapi import FastAPI, HTTPException
 from internal.models import Character
 import internal.database as repo
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = FastAPI()
 DB_PATH = os.getenv("DATABASE_URL")

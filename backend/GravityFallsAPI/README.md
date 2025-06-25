@@ -58,7 +58,7 @@ Returns detailed information about a character by their `id`:
 ## 📌 Example Request
 
 ```bash
-curl http://localhost:9090/characters/85
+curl http://0.0.0.0:9090/characters/85
 ```
 
 ---
