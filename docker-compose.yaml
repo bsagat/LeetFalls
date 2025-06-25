@@ -1,0 +1,66 @@
+services:
+  leetfalls_app:
+    build:
+      context: ./backend/app
+      dockerfile: Dockerfile
+    container_name: leetfalls_app
+    env_file:
+      - .env
+    depends_on:
+      leetfalls_db:
+        condition: service_healthy
+      leetfalls_storage:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  leetfalls_db:
+    image: postgres:15
+    container_name: leetfalls_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/app/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${DB_PORT}:5432"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  leetfalls_storage:
+    build:
+      context: ./backend/GonIO
+      dockerfile: Dockerfile
+    container_name: leetfalls_storage
+    ports:
+      - "${S3_PORT}:9090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9090/PING"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gravityfalls_server:
+    build:
+      context: ./backend/GravityFallsAPI
+      dockerfile: Dockerfile
+    container_name: gravityfalls_server
+    environment:
+      DATABASE_URL: ${DB_URL}
+      S3_URL: ${S3_URL}
+    ports:
+      - "${GRAVITYFALLS_PORT}:7777"
+    depends_on:
+      leetfalls_storage:
+        condition: service_healthy
+      leetfalls_db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
