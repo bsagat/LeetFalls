@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	dbrepo "leetFalls/internal/adapters/dbRepo"
+	"leetFalls/internal/adapters/handlers"
+	"leetFalls/internal/service"
 	"log"
 	"log/slog"
 	"net/http"
@@ -39,4 +42,44 @@ func WaitForShutDown(srv *http.Server) {
 	}
 
 	slog.Info("HTTP server gracefully stopped")
+}
+
+func SetRouter() *http.ServeMux {
+	db, storage, external := ConnectAdapters()
+
+	commentRepo := dbrepo.NewCommentRepo(db)
+	postRepo := dbrepo.NewPostsRepo(db)
+	authRepo := dbrepo.NewAuthRepo(db)
+
+	authServ := service.NewAuthService(*authRepo, *external)
+	commentServ := service.NewCommentService(*authRepo, *storage, *commentRepo, *postRepo)
+	postServ := service.NewPostService(*authServ, *storage, *postRepo, *commentRepo)
+
+	catalogH := handlers.NewCatalogHandler(*postServ, *authServ, *commentServ)
+	archiveH := handlers.NewArchiveHandler(*postServ, *authServ)
+	// profileH := handlers.NewProfileHandler()
+
+	mux := http.NewServeMux()
+
+	// Static files
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("templates"))))
+
+	// Catalog API endpoints
+	mux.HandleFunc("GET /catalog", catalogH.ServeMainPage)
+	mux.HandleFunc("GET /catalog/post/{id}", catalogH.ServeCatalogPost)
+	mux.HandleFunc("GET /catalog/post/new", catalogH.ShowCreatePostForm)
+
+	// // Profile API endpoints
+	// mux.HandleFunc("GET /profile", profileH.ServeProfilePage)
+	// mux.HandleFunc("GET /profile/posts", profileH.GetUserPostsHandler)
+
+	// Archive API endpoints
+	mux.HandleFunc("GET /archive", archiveH.ServeArchivePage)
+	mux.HandleFunc("GET /archive/post/{id}", archiveH.ServeArchivePost)
+
+	// New subjects API endpoints
+	mux.HandleFunc("POST /submit/post", catalogH.CreatePostHandler)
+	mux.HandleFunc("POST /submit/comment", catalogH.CreateCommentHandler)
+
+	return mux
 }

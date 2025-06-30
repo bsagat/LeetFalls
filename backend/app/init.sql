@@ -39,26 +39,17 @@ CREATE INDEX idx_post_id ON Comments(Post_id);
 CREATE INDEX idx_author_id_comments ON Comments(Author_id);
 
 INSERT INTO Users (Name, Token_ID, Avatar_URL) VALUES
-('Dipper Pines', 'token_dipper_123', 'http://127.0.0.1:9090/characters/dipper.png'),
-('Mabel Pines', 'token_mabel_123', 'http://127.0.0.1:9090/characters/mabel.png'),
-('Bill Cipher', 'token_bill_123', 'http://127.0.0.1:9090/characters/bill.png'),
-('Wendy Corduroy', 'token_wendy_123', 'http://127.0.0.1:9090/characters/wendy.png'),
-('Grunkle Stan', 'token_stan_123', 'http://127.0.0.1:9090/characters/stan.png');
+('Dipper Pines', 'token_dipper_123', 'http://127.0.0.1:9090/objects/characters/Dipper_Pines.png'),
+('Mabel Pines', 'token_mabel_123', 'http://127.0.0.1:9090/objects/characters/mabel_pines.png'),
+('Bill Cipher', 'token_bill_123', 'http://127.0.0.1:9090/objects/characters/Bill_Cipher.png');
 
 INSERT INTO Posts (ImageURL, Title, Content, Author_id) VALUES
 ('None', 'Journal 3 Found!', 'Guys, I finally found Journal 3! There are things in here that shouldn’t exist...', 1),
 ('None', 'Glitter Bomb Attack 💥', 'I may or may not have filled Waddles’ food bowl with glitter. Worth it.', 2),
-('None', 'The End Is Near', 'Time is an illusion. So is your free will.', 3),
-('None', 'Hanging Out in the Treehouse', 'This place is my escape from the Mystery Shack madness. Come chill.', 4),
-('None', 'Limited-Time Mystery Shack Deal!', 'Buy one cursed object, get the second at half price. No refunds!', 5);
+('None', 'The End Is Near', 'Time is an illusion. So is your free will.', 3);
 
 INSERT INTO Comments (Post_id, Author_id, Content, ImageURL) VALUES
 (1, 2, 'OMG! Is there anything about unicorns in there?', NULL),
 (1, 3, 'Careful with that, kid. Knowledge is... unstable.', '/static/images/comments/eye.png'),
-(2, 1, 'Mabel... not again. Poor Waddles!', NULL),
-(3, 5, 'This guy again. Someone grab the exorcism kit.', NULL),
-(5, 4, 'Wait, you’re actually charging people again?!', NULL);
+(2, 1, 'Mabel... not again. Poor Waddles!', NULL);
 
--- Reply to previous comment
-INSERT INTO Comments (Post_id, Author_id, Content, Reply_to) VALUES
-(5, 5, 'Hey! A man’s gotta make a living!', 5);
