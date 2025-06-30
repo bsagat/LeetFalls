@@ -4,9 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	dbrepo "leetFalls/internal/adapters/dbRepo"
-	"leetFalls/internal/adapters/external"
 	"leetFalls/internal/domain/models"
+	"leetFalls/internal/domain/ports"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -14,11 +13,11 @@ import (
 )
 
 type AuthService struct {
-	dbrepo   dbrepo.AuthRepo
-	external external.GravityFallsAPI
+	dbrepo   ports.UserRepo
+	external ports.ExternalAPI
 }
 
-func NewAuthService(dbrepo dbrepo.AuthRepo, external external.GravityFallsAPI) *AuthService {
+func NewAuthService(dbrepo ports.UserRepo, external ports.ExternalAPI) *AuthService {
 	return &AuthService{dbrepo: dbrepo, external: external}
 }
 

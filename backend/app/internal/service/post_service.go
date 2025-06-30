@@ -3,10 +3,9 @@ package service
 import (
 	"fmt"
 	"html/template"
-	dbrepo "leetFalls/internal/adapters/dbRepo"
-	"leetFalls/internal/adapters/storage"
 	"leetFalls/internal/domain"
 	"leetFalls/internal/domain/models"
+	"leetFalls/internal/domain/ports"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
@@ -15,22 +14,22 @@ import (
 )
 
 type PostService struct {
-	AuthService AuthService
-	storage     storage.GonIO
-	commentRepo dbrepo.CommentRepo
-	repo        dbrepo.PostsRepo
+	AuthService ports.AuthService
+	storage     ports.Storage
+	commentRepo ports.CommentRepo
+	postRepo    ports.PostsRepo
 }
 
-func NewPostService(authService AuthService, storage storage.GonIO, repo dbrepo.PostsRepo, commentRepo dbrepo.CommentRepo) *PostService {
+func NewPostService(authService ports.AuthService, storage ports.Storage, postRepo ports.PostsRepo, commentRepo ports.CommentRepo) *PostService {
 	return &PostService{
 		AuthService: authService,
 		storage:     storage,
-		repo:        repo,
+		postRepo:    postRepo,
 		commentRepo: commentRepo,
 	}
 }
 
-func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content string, file multipart.File, cookie *http.Cookie) (domain.Code, error) {
+func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content string, file multipart.File, cookie *http.Cookie) (int, error) {
 	post := models.Post{
 		Title:   title,
 		Content: content,
@@ -56,7 +55,7 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 	post.Author.ID = userId
 
 	// 4) Get unique post ID
-	post.ID, err = s.repo.GetNextPostId()
+	post.ID, err = s.postRepo.GetNextPostId()
 	if err != nil {
 		slog.Error("Failed to get next post id: ", "error", err)
 		return http.StatusInternalServerError, err
@@ -71,7 +70,7 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 	}
 
 	// 6) Save Post to Database
-	err = s.repo.SavePost(post)
+	err = s.postRepo.SavePost(post)
 	if err != nil {
 		slog.Error("Failed to save post to database: ", "error", err)
 		return http.StatusInternalServerError, err
@@ -81,7 +80,7 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 	return http.StatusCreated, nil
 }
 
-func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive bool) (domain.Code, error) {
+func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive bool) (int, error) {
 	// 1) Post Validation - post ID
 	id, err := strconv.Atoi(postId)
 	if err != nil {
@@ -89,7 +88,7 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 	}
 
 	// 2) Parse post data from database
-	post, err := s.repo.GetPost(id)
+	post, err := s.postRepo.GetPost(id)
 	if err != nil {
 		slog.Error("Failed to get post by ID", "postID", id, "error", err)
 		return http.StatusInternalServerError, err
@@ -119,7 +118,7 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 	}
 
 	// 5) Get Post Comments list
-	comments, err := s.commentRepo.GetCommentsByPost(id)
+	comments, err := s.commentRepo.CommentsByPost(id)
 	if err != nil {
 		slog.Error("Failed to get comments by post: ", "error", err)
 		return http.StatusInternalServerError, err
@@ -163,8 +162,8 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 	return http.StatusOK, nil
 }
 
-func (s *PostService) ShowCatalogWithPosts(w http.ResponseWriter) (domain.Code, error) {
-	posts, err := s.repo.ActivePosts()
+func (s *PostService) ShowCatalogWithPosts(w http.ResponseWriter) (int, error) {
+	posts, err := s.postRepo.ActivePosts()
 	if err != nil {
 		slog.Error("Failed to get active posts from database: ", "error", err)
 		return http.StatusInternalServerError, err
@@ -184,8 +183,8 @@ func (s *PostService) ShowCatalogWithPosts(w http.ResponseWriter) (domain.Code, 
 	return http.StatusOK, nil
 }
 
-func (s *PostService) ShowArchiveWithPosts(w http.ResponseWriter) (domain.Code, error) {
-	posts, err := s.repo.ArchivePosts()
+func (s *PostService) ShowArchiveWithPosts(w http.ResponseWriter) (int, error) {
+	posts, err := s.postRepo.ArchivePosts()
 	if err != nil {
 		slog.Error("Failed to get archive posts from database: ", "error", err)
 		return http.StatusInternalServerError, err

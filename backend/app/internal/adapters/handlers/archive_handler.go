@@ -2,17 +2,17 @@ package handlers
 
 import (
 	"errors"
-	"leetFalls/internal/service"
+	"leetFalls/internal/domain/ports"
 	"log/slog"
 	"net/http"
 )
 
 type ArchiveHandler struct {
-	postServ service.PostService
-	authServ service.AuthService
+	postServ ports.PostService
+	authServ ports.AuthService
 }
 
-func NewArchiveHandler(postServ service.PostService, authServ service.AuthService) *ArchiveHandler {
+func NewArchiveHandler(postServ ports.PostService, authServ ports.AuthService) *ArchiveHandler {
 	return &ArchiveHandler{postServ: postServ, authServ: authServ}
 }
 

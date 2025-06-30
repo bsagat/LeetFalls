@@ -3,27 +3,26 @@ package service
 import (
 	"fmt"
 	"io"
-	dbrepo "leetFalls/internal/adapters/dbRepo"
-	"leetFalls/internal/adapters/storage"
 	"leetFalls/internal/domain"
 	"leetFalls/internal/domain/models"
+	"leetFalls/internal/domain/ports"
 	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 type CommentService struct {
-	storage     storage.GonIO
-	authRepo    dbrepo.AuthRepo
-	postRepo    dbrepo.PostsRepo
-	commentRepo dbrepo.CommentRepo
+	storage     ports.Storage
+	userRepo    ports.UserRepo
+	postRepo    ports.PostsRepo
+	commentRepo ports.CommentRepo
 }
 
-func NewCommentService(authRepo dbrepo.AuthRepo, storage storage.GonIO, commentRepo dbrepo.CommentRepo, postRepo dbrepo.PostsRepo) *CommentService {
-	return &CommentService{authRepo: authRepo, storage: storage, commentRepo: commentRepo, postRepo: postRepo}
+func NewCommentService(userRepo ports.UserRepo, storage ports.Storage, commentRepo ports.CommentRepo, postRepo ports.PostsRepo) *CommentService {
+	return &CommentService{userRepo: userRepo, storage: storage, commentRepo: commentRepo, postRepo: postRepo}
 }
 
-func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, content string, file io.Reader) (domain.Code, error) {
+func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, content string, file io.Reader) (int, error) {
 	var (
 		comm models.Comment
 		err  error
@@ -66,7 +65,7 @@ func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, con
 	}
 
 	// 4) Comment author data parsing
-	user, err := s.authRepo.GetUserById(authorId)
+	user, err := s.userRepo.GetUserById(authorId)
 	if err != nil {
 		slog.Error("Failed to get user data by id: ", "error", err.Error())
 		return http.StatusInternalServerError, err
@@ -79,7 +78,7 @@ func (s *CommentService) CreateComment(authorId int, postId, commentReplyId, con
 	comm.Author.ID = user.ID
 
 	// 5) Get unique Comment ID
-	comm.ID, err = s.commentRepo.GetNextCommentId()
+	comm.ID, err = s.commentRepo.NextCommentId()
 	if err != nil {
 		slog.Error("Failed to get next comment id: ", "error", err)
 		return http.StatusInternalServerError, err

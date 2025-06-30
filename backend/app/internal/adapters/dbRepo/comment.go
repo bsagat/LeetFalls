@@ -27,7 +27,7 @@ func (repo *CommentRepo) SaveComment(comm models.Comment) error {
 	return nil
 }
 
-func (repo *CommentRepo) GetCommentsByPost(postID int) ([]models.Comment, error) {
+func (repo *CommentRepo) CommentsByPost(postID int) ([]models.Comment, error) {
 	rows, err := repo.Db.Query(`
 		SELECT c.ID, c.Post_id, COALESCE(c.Reply_to, 0)::INTEGER, c.Content, u.Avatar_URL, u.Name, c.Created_at, COALESCE(c.ImageURL,'')  FROM Comments c
 		INNER JOIN Users u On c.Author_id=u.ID
@@ -50,7 +50,7 @@ func (repo *CommentRepo) GetCommentsByPost(postID int) ([]models.Comment, error)
 }
 
 // Gets unique comment id
-func (repo *CommentRepo) GetNextCommentId() (int, error) {
+func (repo *CommentRepo) NextCommentId() (int, error) {
 	var id int
 	if err := repo.Db.QueryRow("SELECT COALESCE(MAX(ID), 0) + 1 FROM Comments").Scan(&id); err != nil {
 		return 0, err

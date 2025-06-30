@@ -3,18 +3,18 @@ package handlers
 import (
 	"errors"
 	"leetFalls/internal/domain"
-	"leetFalls/internal/service"
+	"leetFalls/internal/domain/ports"
 	"log/slog"
 	"net/http"
 )
 
 type CatalogHandler struct {
-	postServ    service.PostService
-	commentServ service.CommentService
-	authServ    service.AuthService
+	postServ    ports.PostService
+	commentServ ports.CommentService
+	authServ    ports.AuthService
 }
 
-func NewCatalogHandler(postServ service.PostService, authServ service.AuthService, commentServ service.CommentService) *CatalogHandler {
+func NewCatalogHandler(postServ ports.PostService, authServ ports.AuthService, commentServ ports.CommentService) *CatalogHandler {
 	return &CatalogHandler{postServ: postServ, authServ: authServ, commentServ: commentServ}
 }
 
