@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet"> 
 </head>
 <body>
+    
     <nav>
         <a href="/profile">Profile</a>
         <a href="/catalog">Catalog</a>
@@ -49,13 +50,19 @@
         {{range .}}
         <div class="general-post">
             <a href="/archive/post/{{.ID}}">
-                <img src="{{.ImageLink}}" alt="General-post img">
+                <img src="{{.ImageLink}}" alt="">
             </a>
             <div class="post-avatar-circle">
                 <img src="{{.Author.ImageURL}}" alt="Avatar">
             </div>
         </div>
         {{end}}
-    </div>  
+    </div>
+
+    <footer>
+        <p>&copy; 2025 LeetFalls. All Rights Reserved.</p>
+        <p>Authors: Sagat Bekbolat and Rakhimov Mansur</p>
+    </footer>
+</main>
 </body>
 </html>

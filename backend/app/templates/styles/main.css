@@ -8,20 +8,19 @@ body {
     box-sizing: border-box;
 }
 
-
 nav {
     display: flex;
     justify-content: space-around;
     align-items: center;
     border: 2px solid #00ffcc;
-    margin: 29px 0 0 50px;
+    margin: 29px 0 0 0;
+    height: 51.2px;
     border-radius: 15px;
 }
 
 nav a {
     color: #cccccc;
     text-decoration: none;
-    margin: 0 15px;
     font-size: 1em;
 }
 
@@ -44,6 +43,7 @@ nav a:hover {
     gap: 3em;
     padding: 2em;
     flex-wrap: wrap;
+    margin: 50px auto;
 }
 
 .text-block {
@@ -73,7 +73,7 @@ nav a:hover {
 }
 
 .image-block img {
-    width: 768px;
+    width: 750px;
     height: 432px;
     border-radius: 15px;
     object-fit: cover;
@@ -153,70 +153,94 @@ nav a:hover {
     margin-bottom: 2em;
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
+
 .posts-wrapper {
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 95px;
-    padding: 0 1em; /* Обратите внимание: этот padding будет "съедать" по 1em с каждой стороны от 1110px */
+    padding: 0 1em;
 
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 46px; /* <-- Изменено здесь! */
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 46px;
     justify-items: center;
     align-items: start;
 }
 
 .general-post {
     width: 100%;
-    max-width: 280px;
-    
-    height: 257px;
-    border: 1px solid #ffffff;
+    aspect-ratio: 1 / 1;
+
+    border: 1px solid #00ffcc;
     border-radius: 15px;
     background-color: #000000;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
+    box-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.general-post a {
+.general-post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 204, 0.7);
+}
+
+.general-post a.post-link-wrapper {
     text-decoration: none;
     color: inherit;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     align-items: center;
     padding: 0;
-    flex-grow: 1;
+    box-sizing: border-box;
 }
 
-.general-post a img {
+.general-post a img,
+.post-no-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 15px 15px 0 0;
     display: block;
+    z-index: 1;
+}
+
+.post-info-overlay {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    margin-top: auto;
 }
 
 .post-avatar-circle {
     width: 51px;
     height: 51px;
+    margin-top: 10px;
+    margin-left: 10px;
     border: 2px solid #ffffff;
     border-radius: 50%;
     overflow: hidden;
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
+    flex-shrink: 0;
+    margin-right: 10px;
+    z-index: 3;
 }
 
 .post-avatar-circle img {
@@ -224,6 +248,20 @@ nav a:hover {
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+}
+
+.post-title-preview {
+    margin-top: 10px;
+    padding: 0 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+    color: #00ffcc;
+    word-break: break-word;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 footer {
@@ -250,14 +288,13 @@ footer p {
     line-height: 1.4;
 }
 
-/* Медиа-запросы для адаптивности */
 @media (max-width: 950px) {
     .posts-wrapper {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 3-4 поста */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 0.8em;
     }
     .general-post {
-        max-width: none; /* Убираем max-width, чтобы Grid мог растягивать элементы */
+        max-width: none;
     }
 }
 
@@ -273,7 +310,7 @@ footer p {
         max-width: 500px;
     }
     .posts-wrapper {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 2-3 поста */
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 1em;
     }
     .text-block {
@@ -285,6 +322,7 @@ footer p {
     nav {
         flex-wrap: wrap;
         padding: 0.5em;
+        margin: 29px auto 0 auto;
     }
     nav a {
         margin: 0.5em 10px;
@@ -304,12 +342,11 @@ footer p {
         text-align: center;
     }
     .posts-wrapper {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 1-2 поста */
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 1.5em;
         padding: 0 0.5em;
     }
     .general-post {
-        height: auto; /* Позволяет высоте поста адаптироваться к содержимому на мобильных */
         max-width: 100%;
     }
 }

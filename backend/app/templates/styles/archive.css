@@ -5,6 +5,7 @@ body {
     color: #00ffcc;
     position: relative;
     min-height: 100vh;
+    box-sizing: border-box;
 }
 
 nav {
@@ -12,7 +13,8 @@ nav {
     justify-content: space-around;
     align-items: center;
     border: 2px solid #00ffcc;
-    margin: 29px 0 0 50px;
+    margin: 29px 0 0 0;
+    height: 51.2px;
     border-radius: 15px;
 }
 
@@ -34,12 +36,6 @@ nav a:hover {
     margin-right: 0.5em;
 }
 
-nav a strong {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-}
-
 .header-image-container {
     position: relative;
     width: 100%;
@@ -50,11 +46,12 @@ nav a strong {
     align-items: center;
     margin-top: 0;
     margin-bottom: 20px;
+    border: 2px solid #00ffcc;
+    border-radius: 15px;
 }
 
 .header-image {
-    width: 1440px;
-    height: 484px;
+    width: 100%;
     object-fit: cover;
     display: block;
     max-width: 100%;
@@ -190,12 +187,11 @@ nav a strong {
         0 0 2px rgba(0, 0, 0, 0.1); 
 }
 
-/* === ARCHIVE / POSTS SECTION STYLES === */
 .posts-button-container {
     display: flex;
     margin-bottom: 0;
     max-width: 900px;
-    margin-left: 100px;
+    margin-left: auto;
     margin-right: auto;
     padding: 0 1em;
 }
@@ -237,65 +233,97 @@ nav a strong {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 95px;
-    padding: 0 1em; /* Обратите внимание: этот padding будет "съедать" по 1em с каждой стороны от 1110px */
+    padding: 0 1em; 
 
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 46px; /* <-- Изменено здесь! */
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 46px; 
     justify-items: center;
     align-items: start;
 }
 
 .general-post {
     width: 100%;
-    max-width: 280px;
-    
-    height: 257px;
-    border: 1px solid #ffffff;
+    aspect-ratio: 1 / 1; 
+    border: 1px solid #00ffcc;
     border-radius: 15px;
     background-color: #000000;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
+    box-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.general-post a {
+.general-post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 204, 0.7);
+}
+
+.general-post a.post-link-wrapper {
     text-decoration: none;
     color: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0;
-    flex-grow: 1;
-}
-
-.general-post a img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; 
+    align-items: center; 
+    padding: 0; 
+    box-sizing: border-box;
+}
+
+.general-post a img,
+.post-no-image-placeholder {
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; 
     object-fit: cover;
-    border-radius: 15px 15px 0 0;
     display: block;
+    z-index: 1; 
+    border-radius: 15px 15px 0 0; 
+}
+
+.post-no-image-placeholder {
+    background-color: #222;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.post-info-overlay { 
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    margin-top: auto;
 }
 
 .post-avatar-circle {
     width: 51px;
     height: 51px;
+    margin-top: 10px;
+    margin-left: 10px;
     border: 2px solid #ffffff;
     border-radius: 50%;
     overflow: hidden;
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative; 
+    flex-shrink: 0;
+    margin-right: 10px; 
+    z-index: 3; 
 }
 
 .post-avatar-circle img {
@@ -305,98 +333,18 @@ nav a strong {
     border-radius: 50%;
 }
 
-/* Common Media Queries for responsiveness */
-@media (max-width: 1024px) {
-    .content-overlay-container {
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 90%;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        top: 55%;
-    }
-    .circular-logo-container {
-        width: 180px;
-        height: 167px;
-    }
-    .overlay-text-block {
-        max-width: 90%;
-        height: auto;
-        font-size: 18px;
-        padding: 5px;
-        margin-top: 0;
-    }
-}
-
-@media (max-width: 950px) {
-    .posts-wrapper {
-        flex-direction: column;
-        align-items: center;
-        gap: 2em;
-        margin-left: auto;
-    }
-    .general-post {
-        margin: 0.5em auto;
-    }
-}
-
-@media (max-width: 768px) {
-    .content-overlay-container {
-        left: 50%;
-        transform: translate(-50%, -50%);
-        top: 60%;
-        gap: 20px;
-    }
-    .circular-logo-container {
-        width: 150px;
-        height: 139px;
-    }
-    .overlay-text-block {
-        font-size: 16px;
-        padding: 5px;
-        margin-top: 0;
-    }
-    .small-post-row {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .small-post {
-        width: calc(50% - 1em);
-        max-width: 158px;
-        height: auto;
-    }
-}
-
-@media (max-width: 700px) {
-    .small-post-row {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .small-post {
-        width: calc(50% - 1em);
-        max-width: 158px;
-        height: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .posts-button-container {
-        margin-left: auto;
-        justify-content: center;
-    }
-    .posts-wrapper {
-        margin-left: auto;
-    }
-    .general-post, .small-post {
-        width: 90%;
-        height: auto;
-        margin: 0.5em auto;
-    }
-    .small-post-row {
-        flex-direction: column;
-        align-items: center;
-    }
+.post-title-preview {
+    padding: 0 5px; 
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: left; 
+    color: #00ffcc;
+    word-break: break-word;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
 }
 
 footer {
@@ -423,6 +371,61 @@ footer p {
     line-height: 1.4;
 }
 
+@media (max-width: 1024px) {
+    .content-overlay-container {
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        top: 55%;
+    }
+    .circular-logo-container {
+        width: 180px;
+        height: 167px;
+    }
+    .overlay-text-block {
+        max-width: 90%;
+        height: auto;
+        font-size: 18px;
+        padding: 5px;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 950px) {
+    .posts-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.8em;
+    }
+    .general-post {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-overlay-container {
+        left: 50%;
+        transform: translate(-50%, -50%);
+        top: 60%;
+        gap: 20px;
+    }
+    .circular-logo-container {
+        width: 150px;
+        height: 139px;
+    }
+    .overlay-text-block {
+        font-size: 16px;
+        padding: 5px;
+        margin-top: 0;
+    }
+
+    .posts-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1em;
+    }
+}
 
 @media (max-width: 600px) {
     footer {
@@ -431,5 +434,34 @@ footer p {
     }
     footer .footer-line {
         width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    nav {
+        flex-wrap: wrap;
+        padding: 0.5em;
+        margin: 29px auto 0 auto;
+    }
+    nav a {
+        margin: 0.5em 10px;
+        font-size: 0.9em;
+    }
+    .nav-icon {
+        height: 2.5em;
+    }
+
+    .posts-button-container {
+        margin-left: auto;
+        justify-content: center;
+    }
+    .posts-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5em;
+        padding: 0 0.5em;
+        margin-left: auto;
+    }
+    .general-post {
+        max-width: 100%;
     }
 }
