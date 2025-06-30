@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"html/template"
 	dbrepo "leetFalls/internal/adapters/dbRepo"
@@ -12,7 +11,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -38,36 +36,33 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 		Content: content,
 	}
 
+	// 1) Form fields validation
 	if err := PostValidation(post); err != nil {
 		return http.StatusBadRequest, err
 	}
 
-	// Sql injection check
-	if strings.Contains(userName, "--") {
-		return http.StatusBadRequest, domain.ErrUserNameDoubleGyphen
-	}
-
-	// Cookie session_id validation
+	// 2) Cookie session_id validation
 	userId, err := s.AuthService.Auth(w, cookie)
 	if err != nil {
 		slog.Error("User authorization check failed: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
-	// User name modification
+	// 3) User name modification
 	if err := s.AuthService.ChangeUserName(userId, userName); err != nil {
 		slog.Error("Failed to change user name: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 	post.Author.ID = userId
 
+	// 4) Get unique post ID
 	post.ID, err = s.repo.GetNextPostId()
 	if err != nil {
 		slog.Error("Failed to get next post id: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
-	// Post Image save
+	// 5) Save image to storage
 	if file != nil {
 		if err := s.storage.SavePostImage(&post, file); err != nil {
 			slog.Error("Failed to save post image to storage: ", "error", err)
@@ -75,7 +70,7 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 		}
 	}
 
-	// Post save
+	// 6) Save Post to Database
 	err = s.repo.SavePost(post)
 	if err != nil {
 		slog.Error("Failed to save post to database: ", "error", err)
@@ -87,11 +82,13 @@ func (s *PostService) CreatePost(w http.ResponseWriter, userName, title, content
 }
 
 func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive bool) (domain.Code, error) {
+	// 1) Post Validation - post ID
 	id, err := strconv.Atoi(postId)
 	if err != nil {
 		return http.StatusBadRequest, domain.ErrInvalidPostId
 	}
 
+	// 2) Parse post data from database
 	post, err := s.repo.GetPost(id)
 	if err != nil {
 		slog.Error("Failed to get post by ID", "postID", id, "error", err)
@@ -101,29 +98,39 @@ func (s *PostService) ShowPost(w http.ResponseWriter, postId string, archive boo
 		return http.StatusNotFound, domain.ErrPostNotFound
 	}
 
+	// 3) Validate post TTL during an archive/unarchive request:
 	now := time.Now()
 	if archive && post.ExpiresAt.After(now) {
-		return http.StatusBadRequest, errors.New("post is still active")
+		return http.StatusBadRequest, domain.ErrPostIsActive
 	}
 	if !archive && post.ExpiresAt.Before(now) {
-		return http.StatusBadRequest, errors.New("post is archived")
+		return http.StatusBadRequest, domain.ErrPostIsArchived
 	}
 
-	// Author information fetching
+	// 4) Parse author information
 	author, err := s.AuthService.GetUserById(post.Author.ID)
 	if err != nil {
 		slog.Error("Failed to get user by ID: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
+	if author.ID == 0 {
+		slog.Error("Failed to get user data by id: ", "error", domain.ErrUserNotExist)
+		return http.StatusNotFound, fmt.Errorf("(post author) %w", domain.ErrUserNotExist)
+	}
 
-	// Post comments fetching
+	// 5) Get Post Comments list
 	comments, err := s.commentRepo.GetCommentsByPost(id)
 	if err != nil {
 		slog.Error("Failed to get comments by post: ", "error", err)
 		return http.StatusInternalServerError, err
 	}
 
-	temp, err := template.ParseFiles(domain.Config.TemplatesPath + "/post.html")
+	// 6) Show HTML template
+	htmlFile := "/post.html"
+	if archive {
+		htmlFile = "/archive-post.html"
+	}
+	temp, err := template.ParseFiles(domain.Config.TemplatesPath + htmlFile)
 	if err != nil {
 		slog.Error("Failed to serve post page: ", "error", err)
 		return http.StatusInternalServerError, err
