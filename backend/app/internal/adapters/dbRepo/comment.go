@@ -57,3 +57,17 @@ func (repo *CommentRepo) GetNextCommentId() (int, error) {
 	}
 	return id, nil
 }
+
+func (repo *CommentRepo) IsCommentExist(postID, commentID int) (bool, error) {
+	var exist bool
+	query := `
+		SELECT COUNT(*)!=0 FROM Comments
+		WHERE Post_id = $1 AND ID = $2
+	`
+
+	if err := repo.Db.QueryRow(query, postID, commentID).Scan(&exist); err != nil {
+		return false, err
+	}
+
+	return exist, nil
+}

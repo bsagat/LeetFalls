@@ -2,6 +2,7 @@ package dbrepo
 
 import (
 	"database/sql"
+	"fmt"
 	"leetFalls/internal/domain/models"
 )
 
@@ -86,6 +87,24 @@ func (repo *PostsRepo) ActivePosts() ([]models.Post, error) {
 	return posts, nil
 }
 
+func (repo *PostsRepo) AddExpirationTime(id int, minutes int) error {
+	query := `UPDATE Posts
+		SET Expires_at = Expires_at + ($2 || ' minutes')::interval 
+		WHERE ID = $1`
+	res, err := repo.Db.Exec(query, id, minutes)
+	if err != nil {
+		return err
+	}
+
+	if affected, err := res.RowsAffected(); err == nil {
+		if affected == 0 {
+			return fmt.Errorf("post with ID %d not found or no update needed", id)
+		}
+	} else {
+		return err
+	}
+	return nil
+}
 func (repo *PostsRepo) ArchivePosts() ([]models.Post, error) {
 	rows, err := repo.Db.Query(`
 	SELECT 
@@ -112,4 +131,18 @@ func (repo *PostsRepo) ArchivePosts() ([]models.Post, error) {
 		posts = append(posts, post)
 	}
 	return posts, nil
+}
+
+func (repo *PostsRepo) IsPostExist(postID int) (bool, error) {
+	var exist bool
+	query := `
+		SELECT COUNT(*)!=0 FROM Posts
+		WHERE ID = $1 
+	`
+
+	if err := repo.Db.QueryRow(query, postID).Scan(&exist); err != nil {
+		return false, err
+	}
+
+	return exist, nil
 }

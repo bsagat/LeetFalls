@@ -134,5 +134,5 @@ func (h *CatalogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	http.Redirect(w, r, "http://localhost:8080/posts/"+r.FormValue("postID"), http.StatusSeeOther)
+	http.Redirect(w, r, "http://localhost:8080/catalog/post/"+r.FormValue("postID"), http.StatusSeeOther)
 }
