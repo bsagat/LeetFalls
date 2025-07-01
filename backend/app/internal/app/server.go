@@ -12,6 +12,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func StartServer(srv *http.Server) {
@@ -44,34 +46,30 @@ func WaitForShutDown(srv *http.Server) {
 	slog.Info("HTTP server gracefully stopped")
 }
 
-func SetRouter() *http.ServeMux {
+func SetRouter() (*http.ServeMux, func()) {
 	db, storage, external := ConnectAdapters()
 
 	commentRepo := dbrepo.NewCommentRepo(db)
 	postRepo := dbrepo.NewPostsRepo(db)
 	authRepo := dbrepo.NewAuthRepo(db)
 
-	authServ := service.NewAuthService(*authRepo, *external)
-	commentServ := service.NewCommentService(*authRepo, *storage, *commentRepo, *postRepo)
-	postServ := service.NewPostService(*authServ, *storage, *postRepo, *commentRepo)
+	authServ := service.NewAuthService(authRepo, external, 5)
+	commentServ := service.NewCommentService(authRepo, storage, commentRepo, postRepo)
+	postServ := service.NewPostService(authServ, storage, postRepo, commentRepo)
 
-	catalogH := handlers.NewCatalogHandler(*postServ, *authServ, *commentServ)
-	archiveH := handlers.NewArchiveHandler(*postServ, *authServ)
-	// profileH := handlers.NewProfileHandler()
+	catalogH := handlers.NewCatalogHandler(postServ, authServ, commentServ)
+	archiveH := handlers.NewArchiveHandler(postServ, authServ)
 
 	mux := http.NewServeMux()
+	SetSwagger(mux)
 
 	// Static files
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("templates"))))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web"))))
 
 	// Catalog API endpoints
 	mux.HandleFunc("GET /catalog", catalogH.ServeMainPage)
 	mux.HandleFunc("GET /catalog/post/{id}", catalogH.ServeCatalogPost)
 	mux.HandleFunc("GET /catalog/post/new", catalogH.ShowCreatePostForm)
-
-	// // Profile API endpoints
-	// mux.HandleFunc("GET /profile", profileH.ServeProfilePage)
-	// mux.HandleFunc("GET /profile/posts", profileH.GetUserPostsHandler)
 
 	// Archive API endpoints
 	mux.HandleFunc("GET /archive", archiveH.ServeArchivePage)
@@ -81,5 +79,28 @@ func SetRouter() *http.ServeMux {
 	mux.HandleFunc("POST /submit/post", catalogH.CreatePostHandler)
 	mux.HandleFunc("POST /submit/comment", catalogH.CreateCommentHandler)
 
-	return mux
+	cleanup := authServ.Close
+	return mux, cleanup
+}
+
+func SetSwagger(mux *http.ServeMux) {
+	// Swagger File
+	swaggerBytes, err := os.ReadFile("swagger.json")
+	if err != nil {
+		log.Fatal("Failed to read swagger file: ", err)
+	}
+
+	// Swagger UI
+	mux.HandleFunc("GET /docs/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("/swagger.json"),
+	))
+
+	// Swagger JSON API
+	mux.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/openapi+json")
+		if _, err := w.Write(swaggerBytes); err != nil {
+			slog.Error("Failed to send swagger file", "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	})
 }

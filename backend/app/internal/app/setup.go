@@ -17,10 +17,11 @@ import (
 func Setup() (*http.Server, func()) {
 	logFileCloser := SetLogger()
 
-	mux := SetRouter()
+	mux, servCleanup := SetRouter()
 
 	cleanUp := func() {
 		logFileCloser()
+		servCleanup()
 	}
 
 	srv := &http.Server{
@@ -36,7 +37,7 @@ func SetConfigs() {
 
 	domain.Config.DatabaseDsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
-	domain.Config.TemplatesPath = "templates" // Default templates path
+	domain.Config.TemplatesPath = "web" // Default templates path
 	domain.Config.StorageHost = os.Getenv("S3_HOST")
 	domain.Config.StoragePort = os.Getenv("S3_PORT")
 	domain.Config.GravityFallsHost = os.Getenv("GRAVITYFALLS_HOST")

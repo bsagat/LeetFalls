@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>LeetFalls Post</title>
+ <link rel="icon" type="image/png" href="/static/images/LeetFalls_icon.png">
+  <link rel="stylesheet" href="/static/styles/post.css"> 
+</head>
+<body>
+
+ <nav>
+  <a href="/profile">Profile</a>
+  <a href="/catalog">Catalog</a>
+  <a href="#"><img src="/static/images/LeetFalls_icon.png" alt="LeetFalls Icon" class="nav-icon"></a>
+  <a href="/archive">Archive</a>
+  <a href="/catalog/post/new">New Post</a>
+ </nav>
+
+ <div class="container">
+  <img class="post-main-image" src="{{.ImageLink}}" alt="Post Image">
+  <div class="right-section">
+   <div class="author-info">
+   <img class="avatar" src="{{.AuthorImageURL}}" alt="Author avatar">
+   <div>{{.AuthorName}}</div>
+   <div class="post-id">Post ID: #{{.ID}}</div>
+   </div>
+   <div class="post-title-box">
+   {{.Title}}
+   </div>
+   <div class="post-title-box">
+   {{.Content}}
+   </div>
+  </div>
+ </div>
+ <div class="comments-header">
+  <div style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; background-color: black; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9em;">{{len .Comments}}</div>
+  <div>Comments</div>
+ </div>
+ <div class="white-line"></div>
+ {{range .Comments}}
+ <div class="container">
+  <div class="right-section">
+   <div class="author-info">
+   <img class="avatar" src="{{.Author.ImageURL}}" alt="Author avatar">
+   <div>{{.Author.Name}}</div>
+   </div>
+   {{if .ReplyToID}}
+   <div style="color: #00ffcc; margin-top: 10px; margin-bottom: 5px;">Reply to: #{{.ReplyToID}}</div>
+   {{end}}
+   <div class="comment-content-wrapper" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+   {{if .ImageLink}}
+   <img class="comment-attached-image" src="{{.ImageLink}}" alt="Comment Image">
+   {{end}}
+   <div style="flex: 1; min-width: 200px; position: relative;">
+    <div class="comment-title-box cut-corner">
+     <div class="comment-id">Comment ID: #{{.ID}}</div>
+     {{.Content}}
+    </div>
+   </div>
+   </div>
+  </div>
+  </div>
+ {{end}}
+ <div class="white-line"></div>
+
+ <div class="comment-form-wrapper">
+  <div class="comment-form-left">
+   <img src="/static/images/what.jpg" alt="Comment Form Image">
+   <p>Hurl your thoughts into the data stream<br>Don't Hold back...</p>
+  </div>
+  <div class="comment-form-container">
+   <h2>Leave a Comment</h2>
+   <form action="/submit/comment" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="postID" value="{{.ID}}">
+    <label for="replyTo">Reply ID</label>
+    <input type="text" id="replyTo" name="ReplyTo" placeholder="Optional">
+    
+    <label for="content">Content</label>
+    <textarea id="content" name="Content" placeholder="Write your comment..." rows="4" required></textarea>
+    
+    <label for="file">File</label>
+    <input type="file" id="file" name="File" accept="image/*">
+    
+    <button type="submit">Post Comment</button>
+   </form>
+  </div>
+ </div>
+  <footer>
+        <p>&copy; 2025 LeetFalls. All Rights Reserved.</p>
+        <p>Authors: Sagat Bekbolat and Rakhimov Mansur</p>
+    </footer>
+</body>
+</html>

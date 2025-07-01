@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="/static/styles/error.css"> 
+    <title>Memory Erased</title>
+</head>
+<body>
+    <h1>Oops... Something slipped through the cracks...</h1>
+    <div class="hand-wrapper">
+        <img src="/static/images/error_hand.png" alt="Author Hand" class="hand" />
+        <div class="error-code">{{.Code}}</div>
+    </div>
+
+    <div class="subtitle">{{.Message}}. Error Code {{.Code}}.</div>
+
+    <div class="buttons">
+        <a href="/catalog" class="btn">Memory Archive</a>
+        <a href="javascript:history.back()" class="btn">Return to the Path</a>
+    </div>
+
+    <div class="quote">
+        "You shouldn’t have seen this."
+— The Author
+    </div>
+</body>
+</html>

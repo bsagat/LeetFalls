@@ -3,6 +3,7 @@ package dbrepo
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"leetFalls/internal/domain/models"
 )
 
@@ -85,4 +86,17 @@ func (repo *AuthRepo) GetUserById(id int) (models.User, error) {
 		return user, err
 	}
 	return user, nil
+}
+
+func (repo *AuthRepo) DeleteExpiredSessions() error {
+	op := "dbrepo.AuthRepo.DeleteExpiredSessions"
+	query := `
+		DELETE FROM Users
+		WHERE Expires_at < Now();
+	`
+
+	if _, err := repo.Db.Exec(query); err != nil {
+		return fmt.Errorf("%s:%w", op, err)
+	}
+	return nil
 }

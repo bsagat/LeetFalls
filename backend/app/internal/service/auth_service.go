@@ -15,10 +15,44 @@ import (
 type AuthService struct {
 	dbrepo   ports.UserRepo
 	external ports.ExternalAPI
+	stop     chan struct{}
+	done     chan struct{}
 }
 
-func NewAuthService(dbrepo ports.UserRepo, external ports.ExternalAPI) *AuthService {
-	return &AuthService{dbrepo: dbrepo, external: external}
+func NewAuthService(dbrepo ports.UserRepo, external ports.ExternalAPI, deleteTimeout int) *AuthService {
+	serv := &AuthService{
+		dbrepo:   dbrepo,
+		external: external,
+		stop:     make(chan struct{}),
+		done:     make(chan struct{}),
+	}
+	serv.StartDeleteExpiredSessions(deleteTimeout)
+	return serv
+}
+
+func (s *AuthService) StartDeleteExpiredSessions(timeoutMinutes int) {
+	t := time.NewTicker(time.Duration(timeoutMinutes) * time.Minute)
+	go func() {
+		defer func() {
+			t.Stop()
+			close(s.done)
+		}()
+		for {
+			select {
+			case <-s.stop:
+				return
+			case <-t.C:
+				if err := s.dbrepo.DeleteExpiredSessions(); err != nil {
+					slog.Warn("Failed to delete expired sessions", "error", err)
+				}
+			}
+		}
+	}()
+}
+
+func (s *AuthService) Close() {
+	close(s.stop)
+	<-s.done
 }
 
 // Validates the session cookie. If valid, it retrieves and returns the current user's ID.

@@ -55,6 +55,7 @@ type PostModificator interface {
 
 type UserRepo interface {
 	UserModificator
+	UserDeleter
 	UserGetter
 	UserSaver
 }
@@ -71,4 +72,8 @@ type UserSaver interface {
 
 type UserModificator interface {
 	ChangeUserName(id int, changedName string) error
+}
+
+type UserDeleter interface {
+	DeleteExpiredSessions() error
 }

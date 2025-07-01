@@ -1,0 +1,589 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Swagger LeetFalls - OpenAPI 3.0",
+    "description": "This is a sample LeetFalls imageboard based on the OpenAPI 3.0 specification. You can find out more about\nSwagger at [https://swagger.io](https://swagger.io). It's an anonymous imageboard set in the mysterious world of Gravity Falls.\n\nSome useful links:\n- [The LeetFalls repository](https://github.com/bsagat/LeetFalls)\n- [Gravity Falls](https://en.wikipedia.org/wiki/Gravity_Falls)",
+    "contact": {
+      "name": "Sagat Bekbolat",
+      "email": "sagatbekbolat854@gmail.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/license/mit"
+    },
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Catalog",
+      "description": "Operations related to the main catalog page and individual posts."
+    },
+    {
+      "name": "Archive",
+      "description": "Operations related to archived posts."
+    },
+    {
+      "name": "Submit",
+      "description": "Endpoints for creating new posts and comments."
+    }
+  ],
+  "paths": {
+    "/catalog": {
+      "get": {
+        "summary": "Retrieve the main catalog page",
+        "description": "Serves the main HTML page displaying active posts.",
+        "tags": [
+          "Catalog"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the main catalog page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/post/{id}": {
+      "get": {
+        "summary": "Retrieve a specific post from the catalog",
+        "description": "Serves the HTML page for a single post, including its comments.",
+        "tags": [
+          "Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique ID of the post to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the post page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Occurs if the post ID is invalid (e.g., not an integer) or if the post is archived.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found. Occurs if the post (or its associated author) is not found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/post/new": {
+      "get": {
+        "summary": "Show the form for creating a new post",
+        "description": "Serves the HTML page containing the form to create a new post.",
+        "tags": [
+          "Catalog"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the post creation form.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/archive": {
+      "get": {
+        "summary": "Retrieve the archive page",
+        "description": "Serves the HTML page displaying archived posts.",
+        "tags": [
+          "Archive"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the archive page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/archive/post/{id}": {
+      "get": {
+        "summary": "Retrieve a specific archived post",
+        "description": "Serves the HTML page for a single archived post.",
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique ID of the archived post to retrieve.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the archived post page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Occurs if the post ID is invalid (e.g., not an integer) or if the post is still active.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found. Occurs if the post (or its associated author) is not found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/submit/post": {
+      "post": {
+        "summary": "Create a new post",
+        "description": "Submits data to create a new post.",
+        "tags": [
+          "Submit"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Name": {
+                    "type": "string",
+                    "description": "Author name",
+                    "example": "Bacoonti777"
+                  },
+                  "Title": {
+                    "type": "string",
+                    "description": "Title of the post.",
+                    "example": "Kairosh bratan is cool man"
+                  },
+                  "Content": {
+                    "type": "string",
+                    "description": "Main text content of the post.",
+                    "example": "Good content"
+                  },
+                  "File": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Optional image file for the post."
+                  }
+                },
+                "required": [
+                  "Title",
+                  "Content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Post created successfully (redirects to the new post or catalog).",
+            "headers": {
+              "Location": {
+                "description": "URL to the newly created post.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (e.g., missing title, content).",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/submit/comment": {
+      "post": {
+        "summary": "Create a new comment",
+        "description": "Submits data to create a new comment on a post or another comment, optionally including an image.",
+        "tags": [
+          "Submit"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "postID": {
+                    "type": "string",
+                    "description": "The ID of the post the comment belongs to."
+                  },
+                  "ReplyTo": {
+                    "type": "string",
+                    "description": "Optional. The ID of the parent comment if this is a reply to a comment.",
+                    "nullable": true
+                  },
+                  "Content": {
+                    "type": "string",
+                    "description": "The text content of the comment."
+                  },
+                  "File": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Optional image file to attach to the comment."
+                  }
+                },
+                "required": [
+                  "postID",
+                  "Content"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Comment created successfully (redirects to the new post or catalog).",
+            "headers": {
+              "Location": {
+                "description": "URL to the newly created post.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (e.g., missing or invalid (post ID, replyID), post or reply comment is not exist, empty content).",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorHtmlPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HtmlPage": {
+        "type": "string",
+        "format": "html",
+        "description": "The HTML content of a web page.",
+        "example": "<!-- HTML content of the page -->"
+      },
+      "ErrorHtmlPage": {
+        "type": "string",
+        "format": "html",
+        "description": "The HTML content of the error page, displaying error code and message.",
+        "example": "<!-- HTML content of the Error page -->"
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Error code.",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable error message.",
+            "example": "Invalid input provided"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the user.",
+            "example": 123
+          },
+          "Name": {
+            "type": "string",
+            "description": "Display name of the user.",
+            "example": "Dipper Pines"
+          },
+          "ImageURL": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the user's avatar image."
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the post.",
+            "example": 1
+          },
+          "Title": {
+            "type": "string",
+            "description": "Title of the post.",
+            "example": "The Mystery of the Gnome"
+          },
+          "Content": {
+            "type": "string",
+            "description": "Main text content of the post.",
+            "example": "I saw a gnome today. It was weird."
+          },
+          "ImageLink": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the image attached to the post.",
+            "nullable": true
+          },
+          "Author": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "Posts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Post"
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the comment.",
+            "example": 101
+          },
+          "PostID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The ID of the post this comment belongs to.",
+            "example": 1
+          },
+          "ReplyToID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Optional. The ID of the comment this comment is replying to.",
+            "nullable": true,
+            "example": 100
+          },
+          "Content": {
+            "type": "string",
+            "description": "The text content of the comment.",
+            "example": "That's so true! I saw one too."
+          },
+          "CreatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the comment was created."
+          },
+          "ImageLink": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional URL to an image attached to the comment.",
+            "nullable": true
+          },
+          "Author": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "PostPageData": {
+        "type": "object",
+        "description": "Data structure used to render a single post page, including its comments.",
+        "properties": {
+          "AuthorImageURL": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the author's avatar image."
+          },
+          "AuthorName": {
+            "type": "string",
+            "description": "Display name of the post author.",
+            "example": "Dipper Pines"
+          },
+          "CreatedAt": {
+            "type": "string",
+            "description": "Formatted timestamp when the post was created.",
+            "example": "2 June 2025, 15:04:05 UTC"
+          },
+          "ID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the post.",
+            "example": 1
+          },
+          "ImageLink": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the image attached to the post.",
+            "nullable": true
+          },
+          "Title": {
+            "type": "string",
+            "description": "Title of the post.",
+            "example": "The Mystery of the Gnome"
+          },
+          "Content": {
+            "type": "string",
+            "description": "Main text content of the post.",
+            "example": "I saw a gnome today. It was weird."
+          },
+          "Comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          }
+        }
+      }
+    }
+  }
+}
