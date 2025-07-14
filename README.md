@@ -216,6 +216,5 @@ If you have any questions, suggestions, or just want to connect, feel free to re
 ### 👤 Mrakhimo
 
 * **GitHub:** [GitHub](https://github.com/zefirkaZirael)
-* **Email:** [sagatbekbolat854@gmail.com](mailto:mansur.cor.tion@gmail.com)
+* **Email:** [mansur.cor.tion@gmail.com](mailto:mansur.cor.tion@gmail.com)
 * **LinkedIn:** [LinkedIn](https://www.linkedin.com/in/mansur-rakhimov/)
-* 
